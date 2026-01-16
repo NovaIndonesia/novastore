@@ -1,0 +1,21 @@
+{
+    "version": 2,
+    "rewrites": [
+        {
+            "source": "/tool1",
+            "destination": "/index2.html"
+        },
+        {
+            "source": "/tool2",
+            "destination": "/rtconverter.html"
+        },
+        {
+            "source": "/tool3",
+            "destination": "/protonhash.html"
+        },
+        {
+            "source": "/(.*)",
+            "destination": "/$1"
+        }
+    ]
+}
