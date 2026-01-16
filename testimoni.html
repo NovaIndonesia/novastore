@@ -183,6 +183,11 @@
         <div id="testimonial-grid" class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
             <!-- Dynamic Testimonials will be injected here -->
         </div>
+
+        <!-- Pagination Controls -->
+        <div id="pagination-controls" class="max-w-6xl mx-auto mt-16 flex flex-wrap justify-center items-center gap-4">
+            <!-- Dynamic Controls -->
+        </div>
     </section>
 
     <!-- Footer -->
@@ -224,64 +229,136 @@
             }
         });
 
-        // Dynamic Testimonial Loader
+        // Dynamic Testimonial Loader System
+        const CONFIG = {
+            totalImages: 91, // Fixed total as requested
+            itemsPerPage: 7,
+        };
+
+        // State
+        let currentPage = 1;
+
+        // Elements
         const grid = document.getElementById('testimonial-grid');
-        let index = 1;
+        const paginationContainer = document.getElementById('pagination-controls');
 
-        function loadTestimonial() {
-            const img = new Image();
-            const currentId = index;
-            const src = `/image/testimoni${currentId}.jpg`;
+        function createCard(id, indexOnPage) {
+            const src = `https://cdn.jsdelivr.net/gh/NovaIndonesia/novastore/image/testimoni${id}.jpg`;
+            const delay = (indexOnPage % 2 === 0) ? '100' : '200'; // Stagger animations
 
-            img.onload = function () {
-                // Template for the testimonial card
-                const card = document.createElement('div');
-                card.className = "mac-card rounded-[2rem] p-6 flex flex-col items-start gap-6 group hover:border-white/20";
-                card.setAttribute('data-aos', 'fade-up');
-                card.setAttribute('data-aos-delay', (currentId % 2 === 0) ? '200' : '100'); // Alternate delays
+            const card = document.createElement('div');
+            card.className = "mac-card rounded-[2rem] p-6 flex flex-col items-start gap-6 group hover:border-white/20";
+            card.setAttribute('data-aos', 'fade-up');
+            card.setAttribute('data-aos-delay', delay);
 
-                card.innerHTML = `
-                    <div class="w-full rounded-2xl overflow-hidden border border-white/10 bg-black/50 relative">
-                        <img src="${src}" alt="Testimony Chat ${currentId}" class="w-full h-auto object-cover hover:scale-105 transition-transform duration-700">
+            card.innerHTML = `
+                <div class="w-full rounded-2xl overflow-hidden border border-white/10 bg-black/50 relative">
+                    <img src="${src}" loading="lazy" alt="Testimonial ${id}" class="w-full h-auto object-cover hover:scale-105 transition-transform duration-700">
+                </div>
+                
+                <div class="w-full pl-2">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="text-xs font-bold text-white uppercase tracking-wider bg-white/10 px-3 py-1 rounded-full border border-white/10">#Testimoni ${id}</span>
+                        <div class="h-px bg-white/10 flex-grow"></div>
                     </div>
                     
-                    <div class="w-full pl-2">
-                        <div class="flex items-center gap-3 mb-4">
-                            <span class="text-sm font-bold text-white uppercase tracking-wider bg-white/10 px-3 py-1 rounded-full border border-white/10">#Testimoni ${currentId}</span>
-                            <div class="h-px bg-white/10 flex-grow"></div>
-                        </div>
-                        
-                        <div class="space-y-2 text-gray-300 font-medium">
-                            <p class="text-lg text-white font-heading">Terima kasih udah support project iini</p>
-                            <div class="flex flex-col gap-1 text-sm text-gray-400">
-                                <span class="flex items-center gap-2"><i data-lucide="check-circle-2" class="w-4 h-4 text-green-400"></i> Fast Setup</span>
-                                <span class="flex items-center gap-2"><i data-lucide="check-circle-2" class="w-4 h-4 text-green-400"></i> Permanent access</span>
-                                <span class="flex items-center gap-2"><i data-lucide="check-circle-2" class="w-4 h-4 text-green-400"></i> Full Support</span>
-                            </div>
+                    <div class="space-y-2 text-gray-300 font-medium">
+                        <p class="text-lg text-white font-heading">Terima kasih udah support project ini</p>
+                        <div class="flex flex-col gap-1 text-sm text-gray-400">
+                            <span class="flex items-center gap-2"><i data-lucide="check-circle-2" class="w-4 h-4 text-green-400"></i> Fast Setup</span>
+                            <span class="flex items-center gap-2"><i data-lucide="check-circle-2" class="w-4 h-4 text-green-400"></i> Permanent access</span>
+                            <span class="flex items-center gap-2"><i data-lucide="check-circle-2" class="w-4 h-4 text-green-400"></i> Full Support</span>
                         </div>
                     </div>
-                `;
-
-                grid.appendChild(card);
-
-                // Re-init lucide icons for new elements
-                lucide.createIcons();
-
-                // Try next image
-                index++;
-                loadTestimonial();
-            };
-
-            img.onerror = function () {
-                // Stop trying to load more when one fails
-                console.log(`Finished loading testimonials. ${currentId - 1} found.`);
-            };
-
-            img.src = src;
+                </div>
+            `;
+            return card;
         }
 
-        // Start loading
-        loadTestimonial();
+        function renderPage(page) {
+            const totalPages = Math.ceil(CONFIG.totalImages / CONFIG.itemsPerPage);
+
+            // Bounds check
+            if (page < 1) page = 1;
+            if (page > totalPages) page = totalPages;
+
+            currentPage = page;
+
+            // Clear Grid & Scroll top of grid
+            grid.innerHTML = '';
+
+            // Calculate range
+            const startId = (page - 1) * CONFIG.itemsPerPage + 1;
+            const endId = Math.min(page * CONFIG.itemsPerPage, CONFIG.totalImages);
+
+            // Generate Cards
+            let indexOnPage = 0;
+            for (let i = startId; i <= endId; i++) {
+                const card = createCard(i, indexOnPage++);
+                grid.appendChild(card);
+            }
+
+            // Refresh AOS & Icons
+            lucide.createIcons();
+            setTimeout(() => {
+                if (window.AOS) window.AOS.refresh();
+            }, 100);
+
+            // Render Controls
+            renderPaginationControls(totalPages);
+        }
+
+        function renderPaginationControls(totalPages) {
+            paginationContainer.innerHTML = '';
+
+            const createBtn = (label, iconName, onClick, disabled = false, isPrimary = false) => {
+                const btn = document.createElement('button');
+                btn.className = `flex items-center gap-2 px-5 py-2.5 rounded-full font-bold text-sm transition-all duration-300 ${disabled
+                    ? 'opacity-40 cursor-not-allowed bg-white/5 text-gray-500'
+                    : isPrimary
+                        ? 'bg-white text-black hover:bg-gray-200 hover:scale-105 shadow-[0_0_20px_rgba(255,255,255,0.1)]'
+                        : 'bg-white/10 text-white hover:bg-white/20 hover:scale-105 border border-white/5'
+                    }`;
+                btn.disabled = disabled;
+                btn.onclick = onClick;
+
+                // Icon placement logic
+                if (label === 'Next' || label === 'Last') {
+                    btn.innerHTML = `<span>${label}</span><i data-lucide="${iconName}" class="w-4 h-4"></i>`;
+                } else {
+                    btn.innerHTML = `<i data-lucide="${iconName}" class="w-4 h-4"></i><span>${label}</span>`;
+                }
+
+                return btn;
+            };
+
+            // First Page
+            if (currentPage > 2) {
+                paginationContainer.appendChild(createBtn('First', 'chevrons-left', () => renderPage(1)));
+            }
+
+            // Preview (Previous)
+            paginationContainer.appendChild(createBtn('Preview', 'chevron-left', () => renderPage(currentPage - 1), currentPage === 1));
+
+            // Page Indicator
+            const info = document.createElement('div');
+            info.className = "px-4 font-mono text-gray-400 text-sm";
+            info.innerText = `${currentPage} / ${totalPages}`;
+            paginationContainer.appendChild(info);
+
+            // Next
+            paginationContainer.appendChild(createBtn('Next', 'chevron-right', () => renderPage(currentPage + 1), currentPage === totalPages, true));
+
+            // Last Page
+            if (currentPage < totalPages - 1) {
+                paginationContainer.appendChild(createBtn('Last', 'chevrons-right', () => renderPage(totalPages)));
+            }
+
+            lucide.createIcons();
+        }
+
+        // Initialize Loading
+        renderPage(1);
     </script>
 </body>
 
