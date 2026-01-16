@@ -102,7 +102,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-20">
                 <!-- Logo -->
-                <a href="index.html" class="flex-shrink-0 flex items-center gap-4 cursor-pointer group">
+                <a href="/" class="flex-shrink-0 flex items-center gap-4 cursor-pointer group">
                     <div
                         class="w-10 h-10 rounded-xl bg-gradient-to-tr from-white to-gray-400 text-black flex items-center justify-center font-bold text-xl transition-all duration-500 group-hover:rotate-180 group-hover:scale-110 shadow-[0_0_20px_rgba(255,255,255,0.2)]">
                         N
@@ -114,13 +114,13 @@
                 <!-- Desktop Menu -->
                 <div class="hidden md:block">
                     <div class="flex items-center gap-1 p-1 rounded-full border border-white/5 bg-white/[0.03]">
-                        <a href="index.html"
+                        <a href="/"
                             class="text-gray-400 hover:text-white hover:bg-white/10 px-6 py-2 rounded-full text-sm font-medium transition-all duration-300">Home</a>
-                        <a href="testimoni.html"
+                        <a href="/testimoni"
                             class="text-white bg-white/10 px-6 py-2 rounded-full text-sm font-medium transition-all duration-300 shadow-[0_0_20px_rgba(255,255,255,0.1)]">Testimoni</a>
-                        <a href="index.html#products"
+                        <a href="/#products"
                             class="text-gray-400 hover:text-white hover:bg-white/10 px-6 py-2 rounded-full text-sm font-medium transition-all duration-300">Products</a>
-                        <a href="index.html#contact"
+                        <a href="/#contact"
                             class="text-gray-400 hover:text-white hover:bg-white/10 px-6 py-2 rounded-full text-sm font-medium transition-all duration-300">Contact</a>
                     </div>
                 </div>
@@ -148,13 +148,13 @@
         <div id="mobile-menu"
             class="hidden md:hidden mac-glass border-t border-white/5 absolute w-full left-0 top-20 shadow-2xl backdrop-blur-3xl transition-all duration-300">
             <div class="px-4 pt-4 pb-6 space-y-2">
-                <a href="index.html"
+                <a href="/"
                     class="block px-4 py-3 rounded-lg text-base font-medium text-gray-300 hover:text-white hover:bg-white/10 hover:pl-6 transition-all">Home</a>
-                <a href="testimoni.html"
+                <a href="/testimoni"
                     class="block px-4 py-3 rounded-lg text-base font-medium text-white bg-white/5 pl-6 transition-all">Testimoni</a>
-                <a href="index.html#products"
+                <a href="/#products"
                     class="block px-4 py-3 rounded-lg text-base font-medium text-gray-300 hover:text-white hover:bg-white/10 hover:pl-6 transition-all">Products</a>
-                <a href="index.html#contact"
+                <a href="/#contact"
                     class="block px-4 py-3 rounded-lg text-base font-medium text-gray-300 hover:text-white hover:bg-white/10 hover:pl-6 transition-all">Contact</a>
             </div>
         </div>
@@ -231,7 +231,7 @@
         function loadTestimonial() {
             const img = new Image();
             const currentId = index;
-            const src = `image/testimoni${currentId}.jpg`;
+            const src = `/image/testimoni${currentId}.jpg`;
 
             img.onload = function () {
                 // Template for the testimonial card
