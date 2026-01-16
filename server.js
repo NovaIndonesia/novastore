@@ -7,8 +7,8 @@ const port = process.env.PORT || 3000;
 app.use(express.static(path.join(__dirname, '.')));
 
 // Custom Routes mapping
-app.get('/tool1', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index2.html'));
+app.get('/testimoni', (req, res) => {
+    res.sendFile(path.join(__dirname, 'testimoni.html'));
 });
 
 app.get('/tool2', (req, res) => {
@@ -28,7 +28,7 @@ app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
     console.log(`Routes available:`);
     console.log(`- http://localhost:${port}/ (Home)`);
-    console.log(`- http://localhost:${port}/tool1 (Items Tool)`);
+    console.log(`- http://localhost:${port}/testimoni`);
     console.log(`- http://localhost:${port}/tool2 (RT Converter)`);
     console.log(`- http://localhost:${port}/tool3 (Proton Hash)`);
 });
