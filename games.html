@@ -1,0 +1,1489 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>NovaStore — Lucky Games</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:#05050a;color:#fff;font-family:'Inter',sans-serif;min-height:100vh;overflow-x:hidden}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:#0a0a0a}::-webkit-scrollbar-thumb{background:#222;border-radius:2px}
+
+.ambient{position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(ellipse 80% 55% at 15% -5%,rgba(90,40,240,.1) 0%,transparent 55%),
+             radial-gradient(ellipse 65% 45% at 88% 108%,rgba(0,190,90,.08) 0%,transparent 50%),
+             radial-gradient(ellipse 45% 65% at 55% 45%,rgba(220,55,55,.04) 0%,transparent 65%)}
+.noise{position:fixed;inset:0;pointer-events:none;z-index:1;opacity:.022;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size:200px 200px}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:50;height:62px;
+  background:rgba(5,5,10,.92);backdrop-filter:blur(28px);
+  border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center}
+.nav-inner{max-width:1280px;margin:0 auto;padding:0 24px;width:100%;display:flex;justify-content:space-between;align-items:center}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.logo-icon{width:34px;height:34px;border-radius:10px;background:#fff;display:flex;align-items:center;justify-content:center;
+  font-family:'Outfit',sans-serif;font-weight:900;font-size:16px;color:#000;box-shadow:0 0 20px rgba(255,255,255,.38)}
+.logo-text{font-family:'Outfit',sans-serif;font-weight:800;font-size:19px;color:#fff}
+.hlink{font-size:13px;color:#444;text-decoration:none;transition:color .2s}.hlink:hover{color:#fff}
+
+/* HERO */
+.hero{padding:104px 24px 36px;text-align:center;position:relative;z-index:2}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.09);border-radius:99px;padding:6px 18px;
+  font-size:12px;color:#777;margin-bottom:18px}
+.bdot{width:7px;height:7px;border-radius:50%;background:#4ade80;animation:bdot 2s infinite}
+@keyframes bdot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.8)}}
+.hero h1{font-family:'Outfit',sans-serif;font-weight:900;font-size:clamp(2.4rem,6vw,4.8rem);
+  line-height:1;letter-spacing:-2.5px;color:#fff;margin-bottom:14px}
+.hero h1 em{font-style:normal;background:linear-gradient(118deg,#fff 0%,#888 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{font-size:14px;color:#444;max-width:440px;margin:0 auto 14px;line-height:1.7}
+.hero-warn{display:inline-flex;align-items:center;gap:7px;background:rgba(250,180,0,.07);
+  border:1px solid rgba(250,180,0,.2);border-radius:10px;padding:8px 16px;
+  font-size:12px;color:#fbbf24;margin-bottom:28px}
+.session-badge{display:inline-flex;align-items:center;gap:7px;font-family:'Outfit',sans-serif;font-weight:800;
+  font-size:13px;padding:7px 18px;border-radius:10px;
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:#fff;margin-bottom:32px}
+.session-badge.done{background:rgba(248,113,113,.1);border-color:rgba(248,113,113,.3);color:#f87171}
+
+/* PRIZE POOL */
+.pool-bar{max-width:1180px;margin:0 auto 28px;padding:0 24px;position:relative;z-index:2}
+.pool-inner{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);
+  border-radius:16px;padding:16px 22px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.pool-lbl{font-family:'Outfit',sans-serif;font-size:10px;font-weight:700;color:#333;
+  letter-spacing:2px;text-transform:uppercase;margin-right:6px}
+.ptag{font-size:11px;padding:4px 11px;border-radius:7px;font-weight:700;border:1px solid}
+
+/* LOBBY */
+.lobby-wrap{max-width:1180px;margin:0 auto;padding:0 24px 80px;position:relative;z-index:2}
+.sec-label{font-family:'Outfit',sans-serif;font-size:11px;font-weight:700;color:#333;
+  letter-spacing:3px;text-transform:uppercase;margin-bottom:20px;
+  display:flex;align-items:center;gap:12px}
+.sec-label::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.06)}
+.game-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+@media(max-width:1100px){.game-grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:760px){.game-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:480px){.game-grid{grid-template-columns:1fr}}
+
+/* GAME CARD */
+.gcard{position:relative;border-radius:22px;cursor:pointer;overflow:hidden;background:#0d0d14;
+  transition:transform .28s cubic-bezier(0.34,1.56,0.64,1),box-shadow .28s}
+.gcard::before{content:'';position:absolute;inset:-1px;border-radius:23px;
+  background:var(--gb,linear-gradient(135deg,#333,#111));
+  -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
+  -webkit-mask-composite:xor;mask-composite:exclude;z-index:0;pointer-events:none}
+.gcard:not(.disabled):hover{transform:translateY(-9px) scale(1.03);box-shadow:0 28px 80px var(--gs,rgba(255,255,255,.06))}
+.gcard:not(.disabled):hover .cart-art svg{animation:svgPop .3s cubic-bezier(0.34,1.56,0.64,1) forwards}
+@keyframes svgPop{0%{transform:scale(1) rotate(0)}50%{transform:scale(1.2) rotate(-4deg)}100%{transform:scale(1.14) rotate(-2deg)}}
+.gcard.disabled{cursor:not-allowed;opacity:.5;filter:grayscale(.5)}
+
+/* ART */
+.cart{position:relative;height:172px;display:flex;align-items:center;justify-content:center;overflow:hidden;z-index:1}
+.cart-bg{position:absolute;inset:0;background:var(--art-bg,#0d0d14)}
+.orb1,.orb2,.orb3{position:absolute;border-radius:50%;filter:blur(32px);pointer-events:none;animation:orbFloat 7s ease-in-out infinite}
+.orb1{width:160px;height:160px;background:var(--orb1,rgba(255,255,255,.08));top:-50px;left:-40px}
+.orb2{width:110px;height:110px;background:var(--orb2,rgba(255,255,255,.05));bottom:-30px;right:-20px;animation-delay:-2.5s}
+.orb3{width:80px;height:80px;background:var(--orb3,rgba(255,255,255,.04));top:20px;right:40px;animation-delay:-4.5s}
+@keyframes orbFloat{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-12px) scale(1.06)}}
+.cart-dots{position:absolute;inset:0;opacity:.07;
+  background-image:radial-gradient(circle,rgba(255,255,255,.8) 1px,transparent 1px);
+  background-size:18px 18px}
+.cart::after{content:'';position:absolute;inset:0;z-index:8;pointer-events:none;
+  background:linear-gradient(115deg,transparent 25%,rgba(255,255,255,.1) 50%,transparent 75%);
+  transform:translateX(-100%);transition:transform .55s ease}
+.gcard:not(.disabled):hover .cart::after{transform:translateX(120%)}
+.cart-art{position:relative;z-index:5;width:100%;height:100%;display:flex;align-items:center;justify-content:center}
+.cart-art svg{width:auto;height:116px;filter:drop-shadow(0 6px 28px var(--svg-glow,rgba(255,255,255,.25)))}
+.cbadge{position:absolute;top:11px;left:11px;z-index:9;
+  font-family:'Outfit',sans-serif;font-size:9px;font-weight:800;letter-spacing:1.5px;
+  text-transform:uppercase;padding:3px 9px;border-radius:6px;
+  background:var(--bdgbg,rgba(255,255,255,.12));color:var(--bdgcol,#ccc)}
+.cdisplay{position:absolute;bottom:10px;right:12px;z-index:9;
+  font-family:'Outfit',sans-serif;font-size:11px;font-weight:900;
+  color:var(--disp-col,rgba(255,255,255,.5));text-shadow:0 0 10px var(--disp-glow,rgba(255,255,255,.3))}
+.cbody{padding:13px 16px 16px;position:relative;z-index:1}
+.cname{font-family:'Outfit',sans-serif;font-weight:800;font-size:17px;color:#fff;margin-bottom:3px}
+.cdesc{font-size:11px;color:#444;line-height:1.4;margin-bottom:11px}
+.cmeta{display:flex;align-items:center;justify-content:space-between}
+.ctag{font-size:10px;color:var(--tag-col,#666);font-weight:600;
+  background:var(--tag-bg,rgba(255,255,255,.05));border:1px solid var(--tag-bdr,rgba(255,255,255,.09));
+  border-radius:6px;padding:3px 9px}
+.cplay{font-family:'Outfit',sans-serif;font-size:11px;font-weight:700;
+  padding:5px 14px;border-radius:8px;background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.12);color:#777;transition:all .2s}
+.gcard:not(.disabled):hover .cplay{background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.28);color:#fff}
+
+/* PER-GAME THEMES */
+.g-mines{--gb:linear-gradient(135deg,#ff5533 0%,#7a0000 55%,#1e0000 100%);--art-bg:linear-gradient(155deg,#1e0400 0%,#3d0800 42%,#0c0000 100%);--orb1:rgba(255,70,20,.28);--orb2:rgba(200,20,0,.2);--orb3:rgba(255,120,60,.12);--svg-glow:rgba(255,80,30,.55);--gs:rgba(255,50,15,.2);--bdgbg:rgba(255,55,15,.2);--bdgcol:#ff9977;--disp-col:rgba(255,100,70,.6);--disp-glow:rgba(255,80,30,.5);--tag-col:#ff9977;--tag-bg:rgba(255,55,15,.1);--tag-bdr:rgba(255,55,15,.25)}
+.g-crash{--gb:linear-gradient(135deg,#00ff88 0%,#008844 55%,#001e0d 100%);--art-bg:linear-gradient(155deg,#001808 0%,#003820 42%,#000c04 100%);--orb1:rgba(0,255,130,.22);--orb2:rgba(0,170,70,.16);--orb3:rgba(100,255,170,.1);--svg-glow:rgba(0,255,130,.55);--gs:rgba(0,220,90,.18);--bdgbg:rgba(0,220,100,.18);--bdgcol:#4ade80;--disp-col:rgba(0,255,136,.55);--disp-glow:rgba(0,255,130,.5);--tag-col:#4ade80;--tag-bg:rgba(0,200,80,.1);--tag-bdr:rgba(0,200,80,.25)}
+.g-wheel{--gb:linear-gradient(135deg,#bb77ff 0%,#6622cc 55%,#180044 100%);--art-bg:linear-gradient(155deg,#0e0020 0%,#240060 42%,#060010 100%);--orb1:rgba(170,90,255,.3);--orb2:rgba(110,40,210,.2);--orb3:rgba(200,140,255,.1);--svg-glow:rgba(170,90,255,.6);--gs:rgba(150,70,255,.18);--bdgbg:rgba(150,70,255,.2);--bdgcol:#cc99ff;--disp-col:rgba(180,100,255,.55);--disp-glow:rgba(170,90,255,.5);--tag-col:#cc99ff;--tag-bg:rgba(140,70,255,.1);--tag-bdr:rgba(140,70,255,.25)}
+.g-hilo{--gb:linear-gradient(135deg,#33bbff 0%,#0066cc 55%,#001844 100%);--art-bg:linear-gradient(155deg,#000d1e 0%,#001e4a 42%,#000608 100%);--orb1:rgba(30,160,255,.28);--orb2:rgba(0,100,210,.2);--orb3:rgba(100,200,255,.1);--svg-glow:rgba(30,170,255,.55);--gs:rgba(20,150,255,.18);--bdgbg:rgba(20,150,255,.18);--bdgcol:#77ccff;--disp-col:rgba(50,180,255,.55);--disp-glow:rgba(30,170,255,.5);--tag-col:#77ccff;--tag-bg:rgba(20,140,255,.1);--tag-bdr:rgba(20,140,255,.25)}
+.g-reme{--gb:linear-gradient(135deg,#ff44aa 0%,#880033 55%,#200010 100%);--art-bg:linear-gradient(155deg,#1a001a 0%,#3a0030 42%,#0a000a 100%);--orb1:rgba(255,50,180,.28);--orb2:rgba(200,0,120,.2);--orb3:rgba(255,150,200,.1);--svg-glow:rgba(255,60,180,.55);--gs:rgba(240,40,160,.18);--bdgbg:rgba(240,40,160,.18);--bdgcol:#ff88cc;--disp-col:rgba(255,100,190,.55);--disp-glow:rgba(255,60,180,.5);--tag-col:#ff88cc;--tag-bg:rgba(240,40,160,.1);--tag-bdr:rgba(240,40,160,.25)}
+.g-tower{--gb:linear-gradient(135deg,#ffaa00 0%,#884400 55%,#221100 100%);--art-bg:linear-gradient(155deg,#1a0800 0%,#3a1500 42%,#0a0400 100%);--orb1:rgba(255,160,0,.28);--orb2:rgba(200,80,0,.2);--orb3:rgba(255,200,100,.1);--svg-glow:rgba(255,160,0,.55);--gs:rgba(240,140,0,.18);--bdgbg:rgba(240,140,0,.18);--bdgcol:#ffcc55;--disp-col:rgba(255,180,50,.55);--disp-glow:rgba(255,160,0,.5);--tag-col:#ffcc55;--tag-bg:rgba(240,140,0,.1);--tag-bdr:rgba(240,140,0,.25)}
+.g-dice{--gb:linear-gradient(135deg,#44ddff 0%,#005577 55%,#001122 100%);--art-bg:linear-gradient(155deg,#001520 0%,#003040 42%,#000810 100%);--orb1:rgba(50,220,255,.25);--orb2:rgba(0,140,180,.18);--orb3:rgba(100,240,255,.1);--svg-glow:rgba(50,220,255,.55);--gs:rgba(40,200,240,.18);--bdgbg:rgba(40,200,240,.18);--bdgcol:#88eeff;--disp-col:rgba(80,230,255,.55);--disp-glow:rgba(50,220,255,.5);--tag-col:#88eeff;--tag-bg:rgba(40,200,240,.1);--tag-bdr:rgba(40,200,240,.25)}
+.g-road{--gb:linear-gradient(135deg,#44ff44 0%,#006600 55%,#001100 100%);--art-bg:linear-gradient(155deg,#001800 0%,#003a00 42%,#000a00 100%);--orb1:rgba(50,255,50,.22);--orb2:rgba(0,180,0,.16);--orb3:rgba(150,255,100,.1);--svg-glow:rgba(50,255,50,.5);--gs:rgba(40,240,40,.18);--bdgbg:rgba(40,220,40,.18);--bdgcol:#88ff88;--disp-col:rgba(80,255,80,.55);--disp-glow:rgba(50,255,50,.5);--tag-col:#88ff88;--tag-bg:rgba(40,220,40,.1);--tag-bdr:rgba(40,220,40,.25)}
+
+/* GAME PAGE */
+#gpage{display:none;position:relative;z-index:2;max-width:980px;margin:0 auto;padding:80px 20px 60px}
+#gpage.on{display:block}
+.backbtn{display:inline-flex;align-items:center;gap:8px;font-family:'Outfit',sans-serif;
+  font-size:13px;font-weight:600;color:#555;border:1px solid rgba(255,255,255,.08);
+  border-radius:10px;padding:7px 14px;cursor:pointer;background:transparent;transition:all .2s;margin-bottom:22px}
+.backbtn:hover{color:#fff;border-color:rgba(255,255,255,.22)}
+.panel{display:none}.panel.on{display:block}
+.paccent{height:2px;border-radius:2px;margin-bottom:20px}
+.pa-mines{background:linear-gradient(90deg,#ff5533,transparent)}
+.pa-crash{background:linear-gradient(90deg,#00ff88,transparent)}
+.pa-wheel{background:linear-gradient(90deg,#bb77ff,transparent)}
+.pa-hilo{background:linear-gradient(90deg,#33bbff,transparent)}
+.pa-reme{background:linear-gradient(90deg,#ff44aa,transparent)}
+.pa-tower{background:linear-gradient(90deg,#ffaa00,transparent)}
+.pa-dice{background:linear-gradient(90deg,#44ddff,transparent)}
+.pa-road{background:linear-gradient(90deg,#44ff44,transparent)}
+.g2col{display:grid;grid-template-columns:272px 1fr;gap:13px}
+@media(max-width:700px){.g2col{grid-template-columns:1fr}}
+.ctrl{background:#0b0b12;border:1px solid rgba(255,255,255,.07);border-radius:18px;padding:20px}
+.garea{background:#0b0b12;border:1px solid rgba(255,255,255,.07);border-radius:18px;padding:20px}
+.ptitle{font-family:'Outfit',sans-serif;font-weight:800;font-size:20px;color:#fff;margin-bottom:14px}
+.flbl{display:block;font-size:10px;color:#444;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;margin-bottom:7px}
+.sbox{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:14px;margin-bottom:14px}
+.srow{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.srow:last-child{border:none}
+.slbl{font-size:12px;color:#444}.sval{font-family:'Outfit',sans-serif;font-size:13px;font-weight:700;color:#fff}
+.pbtn{width:100%;padding:12px;border-radius:12px;background:#fff;color:#000;font-family:'Outfit',sans-serif;font-weight:800;font-size:14px;cursor:pointer;border:none;transition:all .2s}
+.pbtn:hover{background:#e8e8e8;transform:scale(1.01)}.pbtn:active{transform:scale(.98)}.pbtn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.gbtn{width:100%;padding:12px;border-radius:12px;background:#4ade80;color:#000;font-family:'Outfit',sans-serif;font-weight:800;font-size:14px;cursor:pointer;border:none;transition:all .2s}
+.gbtn:hover{background:#86efac}
+.ghost{width:100%;padding:9px;border-radius:10px;background:transparent;border:1px solid rgba(255,255,255,.09);color:#444;font-size:13px;cursor:pointer;transition:all .2s}
+.ghost:hover{color:#fff;border-color:rgba(255,255,255,.2)}
+
+/* MINES */
+.mcell{aspect-ratio:1;background:#0e0e16;border:1px solid #1c1c26;border-radius:8px;cursor:pointer;
+  transition:all .12s;display:flex;align-items:center;justify-content:center;font-size:clamp(10px,2vw,18px)}
+.mcell:hover:not(.ms):not(.mh):not(.mr){background:#161622;border-color:#2c2c3a;transform:scale(.95)}
+.mcell.ms{background:#04160a;border-color:#4ade80;animation:pop .2s cubic-bezier(0.34,1.56,0.64,1)}
+.mcell.mh{background:#160404;border-color:#f87171;animation:shk .3s ease}
+.mcell.mr{background:#0c0202;border-color:#7f1d1d}
+@keyframes pop{0%{transform:scale(.65);opacity:.3}100%{transform:scale(1);opacity:1}}
+@keyframes shk{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+
+/* WHEEL */
+.wptr{width:0;height:0;border-left:11px solid transparent;border-right:11px solid transparent;
+  border-bottom:26px solid #fff;position:absolute;top:-13px;left:50%;transform:translateX(-50%);
+  filter:drop-shadow(0 0 7px rgba(255,255,255,.7));z-index:10}
+.crashbig{font-family:'Outfit',sans-serif;font-weight:900;font-size:clamp(2.5rem,6vw,4.5rem);transition:color .1s}
+.pcard{width:60px;height:84px;border-radius:10px;background:#fff;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;font-size:20px;font-weight:700;
+  border:2px solid #e5e7eb;color:#111;position:relative}
+.pcard.red{color:#ef4444}
+
+/* REME - roulette style */
+.reme-ball{width:20px;height:20px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#fff,#ccc);
+  position:absolute;transition:all .1s;box-shadow:0 2px 6px rgba(0,0,0,.5)}
+.reme-cell{border:1px solid rgba(255,255,255,.08);border-radius:6px;display:flex;align-items:center;
+  justify-content:center;cursor:pointer;font-family:'Outfit',sans-serif;font-weight:800;font-size:14px;
+  padding:10px 6px;transition:all .2s;position:relative}
+.reme-cell.red-n{background:#1a0205;border-color:#cc2233}
+.reme-cell.blk-n{background:#0a0a0a;border-color:#333}
+.reme-cell.grn-n{background:#021a08;border-color:#22cc44}
+.reme-cell:hover{transform:scale(1.05);filter:brightness(1.4)}
+.reme-cell.selected{box-shadow:0 0 14px currentColor;filter:brightness(1.6)}
+.reme-cell.winner{animation:reelWin .4s ease 3 alternate;border-color:#fbbf24;background:#1a1400}
+@keyframes reelWin{0%{transform:scale(1)}100%{transform:scale(1.1);filter:brightness(1.8)}}
+
+/* TOWER */
+.tower-row{display:flex;gap:8px;margin-bottom:8px;justify-content:center}
+.tower-cell{width:70px;height:50px;border-radius:10px;background:#0e0e16;border:1px solid #1c1c26;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+  font-size:20px;transition:all .15s;font-family:'Outfit',sans-serif;font-weight:800}
+.tower-cell:hover:not(.revealed){background:#161622;border-color:#2a2a3a;transform:scale(.96)}
+.tower-cell.safe{background:#04160a;border-color:#4ade80;animation:pop .2s ease}
+.tower-cell.bomb{background:#160404;border-color:#f87171;animation:shk .3s ease}
+.tower-cell.hidden-bomb{background:#0c0202;border-color:#7f1d1d}
+.tower-row.current .tower-cell:not(.revealed){border-color:#ffaa00;background:#1a0a00}
+.tower-row.done{opacity:.5}
+
+/* DICE */
+.dice-face{width:80px;height:80px;background:#f0f0f0;border-radius:14px;display:grid;
+  grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);
+  padding:8px;gap:5px;cursor:pointer;transition:transform .2s;user-select:none}
+.dice-face:hover{transform:rotate(5deg) scale(1.05)}
+.dot{border-radius:50%;background:#222}
+.dice-rolling{animation:diceRollAnim .5s ease}
+@keyframes diceRollAnim{0%,100%{transform:rotate(0) scale(1)}25%{transform:rotate(15deg) scale(.9)}75%{transform:rotate(-15deg) scale(1.1)}}
+.dice-target-btn{padding:10px;border-radius:10px;background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.1);color:#888;font-family:'Outfit',sans-serif;
+  font-size:12px;font-weight:700;cursor:pointer;transition:all .2s}
+.dice-target-btn.active{background:rgba(68,221,255,.15);border-color:rgba(68,221,255,.4);color:#44ddff}
+.dice-target-btn:hover:not(.active){background:rgba(255,255,255,.1);color:#fff}
+
+/* ROAD (Cross the Road) — Crossy Road style */
+.road-wrap{width:100%;border-radius:14px;overflow:hidden;border:1px solid #1e1e1e;position:relative;user-select:none}
+.road-lane{height:62px;position:relative;overflow:hidden;display:flex;align-items:center;border-bottom:1px solid rgba(0,0,0,.3)}
+.road-lane:last-child{border-bottom:none}
+.lane-finish{background:linear-gradient(135deg,#0a2a00,#1a4400);border-bottom:2px solid #44ff44 !important}
+.lane-safe-start{background:linear-gradient(135deg,#0a2a00,#1a3a00)}
+.lane-road{background:linear-gradient(180deg,#1a1a1a 0%,#141414 100%)}
+.lane-road-alt{background:linear-gradient(180deg,#161616 0%,#111 100%)}
+.lane-river{background:linear-gradient(180deg,#041220 0%,#071828 100%)}
+/* Road markings on road lanes */
+.lane-road::before,.lane-road-alt::before{content:'';position:absolute;inset:0;
+  background:repeating-linear-gradient(90deg,transparent 0px,transparent 28px,rgba(255,255,0,.15) 28px,rgba(255,255,0,.15) 44px,transparent 44px,transparent 72px);
+  top:50%;height:3px;transform:translateY(-50%)}
+/* River water ripple */
+.lane-river::after{content:'';position:absolute;inset:0;opacity:.15;
+  background:repeating-linear-gradient(90deg,#4499ff 0px,transparent 20px,#4499ff 40px)}
+.lane-label{position:absolute;left:8px;top:50%;transform:translateY(-50%);
+  font-size:10px;color:rgba(255,255,255,.25);z-index:1;letter-spacing:1px;text-transform:uppercase;pointer-events:none}
+.lane-mult{position:absolute;right:8px;top:50%;transform:translateY(-50%);
+  font-family:'Outfit',sans-serif;font-weight:800;font-size:12px;color:rgba(255,255,255,.25);z-index:1;pointer-events:none}
+.lane-mult.active-mult{color:#44ff44;text-shadow:0 0 8px #44ff44}
+.road-chicken{font-size:30px;position:absolute;z-index:10;transition:left .15s ease;pointer-events:none;
+  top:50%;transform:translateY(-50%);left:calc(50% - 15px);filter:drop-shadow(0 2px 6px rgba(0,0,0,.5))}
+.road-obstacle{font-size:24px;position:absolute;z-index:5;top:50%;transform:translateY(-50%);
+  pointer-events:none;will-change:left;transition:none}
+.road-log{font-size:22px;position:absolute;z-index:5;top:50%;transform:translateY(-50%);
+  pointer-events:none;will-change:left}
+/* danger flash */
+.lane-danger{animation:dangerFlash .2s ease 3}
+@keyframes dangerFlash{0%,100%{filter:brightness(1)}50%{filter:brightness(2.5) saturate(3)}}
+.road-btn{padding:11px 20px;border-radius:11px;font-family:'Outfit',sans-serif;font-weight:800;font-size:14px;cursor:pointer;border:none;transition:all .2s}
+.road-btn.up{background:#44ff44;color:#000}.road-btn.up:hover{background:#88ff88}
+.road-btn.down{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);color:#888}
+.road-btn.down:hover{color:#fff}
+
+/* SLOT MACHINE OVERLAY */
+.slot-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(10px);
+  z-index:300;display:flex;align-items:center;justify-content:center;animation:fadeIn .25s ease}
+.slot-overlay.hidden{display:none}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.slot-box{background:#0e0e18;border:1px solid rgba(255,255,255,.1);border-radius:28px;
+  padding:36px 40px;text-align:center;width:420px;max-width:94vw;
+  animation:slideUp .3s cubic-bezier(0.34,1.56,0.64,1)}
+@keyframes slideUp{from{transform:translateY(30px);opacity:0}to{transform:translateY(0);opacity:1}}
+.slot-title{font-family:'Outfit',sans-serif;font-weight:900;font-size:22px;color:#fff;margin-bottom:6px}
+.slot-sub{font-size:12px;color:#555;margin-bottom:22px}
+.reels{display:flex;gap:10px;justify-content:center;margin-bottom:20px}
+.reel{width:84px;height:84px;border-radius:16px;background:#050510;border:2px solid rgba(255,255,255,.09);
+  overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center}
+.reel-inner{font-size:36px;line-height:1;text-align:center}
+.reel.spinning .reel-inner{animation:reelSpin .8s cubic-bezier(0.2,0,.8,1) forwards}
+.reel:nth-child(2).spinning .reel-inner{animation-delay:.12s}
+.reel:nth-child(3).spinning .reel-inner{animation-delay:.24s}
+@keyframes reelSpin{0%{transform:translateY(0);filter:blur(0)}20%{transform:translateY(-60px);filter:blur(3px)}50%{transform:translateY(40px);filter:blur(2px)}80%{transform:translateY(-15px);filter:blur(1px)}100%{transform:translateY(0);filter:blur(0)}}
+.reel.win{border-color:var(--win-col,#4ade80);box-shadow:0 0 18px var(--win-col,#4ade80),0 0 36px var(--win-col,rgba(74,222,128,.3))}
+.reel.win .reel-inner{animation:winPulse .5s ease .9s}
+@keyframes winPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.25)}}
+.result-banner{border-radius:14px;padding:16px 20px;margin-bottom:18px;text-align:center}
+.result-banner.won{background:linear-gradient(135deg,rgba(74,222,128,.1),rgba(0,200,80,.05));border:1px solid rgba(74,222,128,.3)}
+.result-banner.lost{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08)}
+.result-prize{font-family:'Outfit',sans-serif;font-weight:900;font-size:18px;color:#fbbf24;margin-bottom:4px}
+.result-detail{font-size:12px;color:#666;line-height:1.5}
+.result-discount{font-family:'Outfit',sans-serif;font-weight:900;font-size:34px;
+  background:linear-gradient(135deg,#fbbf24,#f97316);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:4px}
+.slot-actions{display:flex;flex-direction:column;gap:8px}
+.spin-again-btn{width:100%;padding:12px;border-radius:12px;background:linear-gradient(135deg,rgba(255,255,255,.12),rgba(255,255,255,.06));
+  border:1px solid rgba(255,255,255,.15);color:#fff;font-family:'Outfit',sans-serif;font-weight:800;font-size:14px;cursor:pointer;transition:all .2s}
+.spin-again-btn:hover{background:linear-gradient(135deg,rgba(255,255,255,.18),rgba(255,255,255,.1));transform:scale(1.01)}
+.spin-again-btn:disabled{opacity:.35;cursor:not-allowed;transform:none}
+.tg-btn{width:100%;padding:12px;border-radius:12px;background:#4ade80;color:#000;
+  font-family:'Outfit',sans-serif;font-weight:800;font-size:14px;cursor:pointer;text-decoration:none;display:block;transition:all .2s}
+.tg-btn:hover{background:#86efac}
+.close-slot-btn{padding:8px 22px;border-radius:10px;background:transparent;border:1px solid rgba(255,255,255,.1);color:#444;font-family:'Outfit',sans-serif;font-weight:600;font-size:13px;cursor:pointer;transition:all .2s}
+.close-slot-btn:hover{color:#fff;border-color:rgba(255,255,255,.2)}
+.spin-count{font-size:12px;color:#444;margin-bottom:14px}.spin-count span{color:#fff;font-weight:700}
+
+/* POPUP */
+.olay{position:fixed;inset:0;background:rgba(0,0,0,.8);backdrop-filter:blur(8px);z-index:400;display:flex;align-items:center;justify-content:center}
+.olay.off{display:none}
+.pbox{background:#0c0c14;border:1px solid #22223a;border-radius:24px;padding:36px 40px;text-align:center;min-width:280px;max-width:380px;animation:popi .3s cubic-bezier(0.34,1.56,0.64,1)}
+@keyframes popi{0%{transform:scale(.75);opacity:0}100%{transform:scale(1);opacity:1}}
+</style>
+</head>
+<body>
+<div class="ambient"></div>
+<div class="noise"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a href="/" class="logo"><div class="logo-icon">N</div><span class="logo-text">NovaStore</span></a>
+    <a href="/" class="hlink">← Home</a>
+  </div>
+</nav>
+
+<!-- LOBBY -->
+<div id="lobby">
+  <div class="hero">
+    <div class="hero-badge"><div class="bdot"></div>NovaStore</div>
+    <h1>Try Your <em>Luck</em></h1>
+    <p>Mainkan game & putar slot untuk memenangkan diskon produk NovaStore. Satu sesi = satu kesempatan per game.</p>
+    <div class="hero-warn">Kesempatan berlaku selama tab ini terbuka. Jangan refresh!</div>
+    <div class="session-badge" id="sbadge">Sesi aktif — pilih game dan mainkan!</div>
+  </div>
+
+  <div class="pool-bar">
+    <div class="pool-inner">
+      <span class="pool-lbl">Diskon Tersedia</span>
+      <span class="ptag" style="background:rgba(251,191,36,.12);border-color:rgba(251,191,36,.3);color:#fbbf24">🏆 50% OFF</span>
+      <span class="ptag" style="background:rgba(234,179,8,.1);border-color:rgba(234,179,8,.25);color:#facc15">⭐ 30% OFF</span>
+      <span class="ptag" style="background:rgba(96,165,250,.1);border-color:rgba(96,165,250,.25);color:#93c5fd">💠 20% OFF</span>
+      <span class="ptag" style="background:rgba(134,239,172,.1);border-color:rgba(134,239,172,.25);color:#86efac">🎁 10% OFF</span>
+      <span class="ptag" style="background:rgba(248,113,113,.08);border-color:rgba(248,113,113,.2);color:#f87171">😔 Tidak Menang</span>
+    </div>
+  </div>
+
+  <div class="lobby-wrap">
+    <div class="sec-label">Pilih Game (8 tersedia)</div>
+    <div class="game-grid">
+
+      <!-- MINES -->
+      <div class="gcard g-mines" id="card-mines" onclick="openG('mines')">
+        <div class="cart"><div class="cart-bg"></div><div class="orb1"></div><div class="orb2"></div><div class="orb3"></div><div class="cart-dots"></div>
+          <div class="cart-art"><svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="58" cy="68" r="34" fill="#1a0600" stroke="#ff5533" stroke-width="2.5"/>
+            <circle cx="58" cy="68" r="27" fill="url(#bG)"/>
+            <ellipse cx="48" cy="54" rx="9" ry="6" fill="rgba(255,255,255,.18)" transform="rotate(-20,48,54)"/>
+            <path d="M58 34 Q70 22 78 16" stroke="#ff9944" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <circle cx="79" cy="15" r="5" fill="#ffdd00"/><circle cx="79" cy="15" r="3" fill="#fff"/>
+            <line x1="24" y1="68" x2="18" y2="68" stroke="#ff5533" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="92" y1="68" x2="98" y2="68" stroke="#ff5533" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="58" y1="34" x2="58" y2="28" stroke="#ff5533" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="58" y1="102" x2="58" y2="108" stroke="#ff5533" stroke-width="2.5" stroke-linecap="round"/>
+            <defs><radialGradient id="bG" cx="40%" cy="35%"><stop offset="0%" stop-color="#7a1500"/><stop offset="100%" stop-color="#1a0400"/></radialGradient></defs>
+          </svg></div>
+          <span class="cbadge">ORIGINAL</span><span class="cdisplay">MINES</span>
+        </div>
+        <div class="cbody"><div class="cname">Mines</div><div class="cdesc">Hindari bom, ungkap tile aman. Cash out untuk spin slot.</div>
+        <div class="cmeta"><span class="ctag">Risk•Reward</span><span class="cplay">Play →</span></div></div>
+      </div>
+
+      <!-- CRASH -->
+      <div class="gcard g-crash" id="card-crash" onclick="openG('crash')">
+        <div class="cart"><div class="cart-bg"></div><div class="orb1"></div><div class="orb2"></div><div class="orb3"></div><div class="cart-dots"></div>
+          <div class="cart-art"><svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+            <path d="M60 10 Q75 30 75 60 L60 75 L45 60 Q45 30 60 10Z" fill="url(#rG)"/>
+            <circle cx="60" cy="45" r="9" fill="#001a0a" stroke="#00ff88" stroke-width="1.5"/>
+            <circle cx="60" cy="45" r="5.5" fill="#002a10"/><circle cx="57" cy="42" r="2" fill="rgba(0,255,136,.4)"/>
+            <path d="M45 60 L30 80 L45 72Z" fill="#003a1a"/><path d="M75 60 L90 80 L75 72Z" fill="#003a1a"/>
+            <ellipse cx="60" cy="82" rx="10" ry="16" fill="url(#fG)" opacity=".9"/><ellipse cx="60" cy="88" rx="6" ry="10" fill="#fff" opacity=".3"/>
+            <circle cx="22" cy="25" r="2" fill="#00ff88" opacity=".6"/><circle cx="95" cy="40" r="1.5" fill="#00ff88" opacity=".5"/>
+            <circle cx="15" cy="70" r="1.5" fill="#00ff88" opacity=".4"/><circle cx="100" cy="65" r="2" fill="#00ff88" opacity=".5"/>
+            <defs>
+              <linearGradient id="rG" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#00ff88"/><stop offset="100%" stop-color="#005522"/></linearGradient>
+              <linearGradient id="fG" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#ffee00"/><stop offset="100%" stop-color="#ff4400" stop-opacity="0"/></linearGradient>
+            </defs>
+          </svg></div>
+          <span class="cbadge">LIVE</span><span class="cdisplay">CRASH</span>
+        </div>
+        <div class="cbody"><div class="cname">Crash</div><div class="cdesc">Terbang setinggi mungkin. Cash out sebelum crash.</div>
+        <div class="cmeta"><span class="ctag">Timing</span><span class="cplay">Play →</span></div></div>
+      </div>
+
+      <!-- WHEEL -->
+      <div class="gcard g-wheel" id="card-wheel" onclick="openG('wheel')">
+        <div class="cart"><div class="cart-bg"></div><div class="orb1"></div><div class="orb2"></div><div class="orb3"></div><div class="cart-dots"></div>
+          <div class="cart-art"><svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="60" cy="60" r="48" fill="none" stroke="#bb77ff" stroke-width="3"/>
+            <circle cx="60" cy="60" r="44" fill="#0e0020"/>
+            <path d="M60 60 L60 16 A44 44 0 0 1 98.1 82Z" fill="#1a0040" stroke="#240060" stroke-width=".8"/>
+            <path d="M60 60 L98.1 82 A44 44 0 0 1 21.9 82Z" fill="#0e0020" stroke="#240060" stroke-width=".8"/>
+            <path d="M60 60 L21.9 82 A44 44 0 0 1 60 16Z" fill="#1a0040" stroke="#240060" stroke-width=".8"/>
+            <circle cx="60" cy="60" r="11" fill="#0e0020" stroke="#bb77ff" stroke-width="2"/>
+            <circle cx="60" cy="60" r="6" fill="#240060"/>
+            <circle cx="74" cy="36" r="3.5" fill="#fbbf24"/><circle cx="87" cy="72" r="3.5" fill="#4ade80"/><circle cx="38" cy="72" r="3.5" fill="#f87171"/>
+            <polygon points="60,8 55,18 65,18" fill="#fff"/>
+          </svg></div>
+          <span class="cbadge">CLASSIC</span><span class="cdisplay">WHEEL</span>
+        </div>
+        <div class="cbody"><div class="cname">Wheel</div><div class="cdesc">Putar roda sekali. Segmen menentukan prize tier.</div>
+        <div class="cmeta"><span class="ctag">Luck</span><span class="cplay">Spin →</span></div></div>
+      </div>
+
+      <!-- HILO -->
+      <div class="gcard g-hilo" id="card-hilo" onclick="openG('hilo')">
+        <div class="cart"><div class="cart-bg"></div><div class="orb1"></div><div class="orb2"></div><div class="orb3"></div><div class="cart-dots"></div>
+          <div class="cart-art"><svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+            <rect x="28" y="24" width="52" height="72" rx="8" fill="#001840" stroke="#0066cc" stroke-width="1.5" transform="rotate(-8,54,60)"/>
+            <rect x="36" y="22" width="52" height="72" rx="8" fill="#fff" stroke="#33bbff" stroke-width="2"/>
+            <text x="62" y="55" font-family="Outfit,serif" font-size="26" font-weight="900" fill="#001a3a" text-anchor="middle">A</text>
+            <text x="62" y="76" font-family="serif" font-size="20" fill="#001a3a" text-anchor="middle">♠</text>
+            <text x="42" y="36" font-family="Outfit,serif" font-size="11" font-weight="700" fill="#001a3a">A</text>
+            <text x="95" y="50" font-size="16" fill="#33bbff" opacity=".7">↑</text>
+            <text x="95" y="76" font-size="16" fill="#f87171" opacity=".7">↓</text>
+          </svg></div>
+          <span class="cbadge">CARDS</span><span class="cdisplay">HI-LO</span>
+        </div>
+        <div class="cbody"><div class="cname">Hi-Lo</div><div class="cdesc">Tebak 3 kartu beruntun dengan benar untuk menang.</div>
+        <div class="cmeta"><span class="ctag">Skill</span><span class="cplay">Play →</span></div></div>
+      </div>
+
+      <!-- REME (Roulette) -->
+      <div class="gcard g-reme" id="card-reme" onclick="openG('reme')">
+        <div class="cart"><div class="cart-bg"></div><div class="orb1"></div><div class="orb2"></div><div class="orb3"></div><div class="cart-dots"></div>
+          <div class="cart-art"><svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+            <!-- Roulette wheel -->
+            <circle cx="60" cy="62" r="46" fill="#1a0020" stroke="#ff44aa" stroke-width="2.5"/>
+            <circle cx="60" cy="62" r="40" fill="#100015"/>
+            <!-- Colored segments -->
+            <path d="M60 62 L60 22 A40 40 0 0 1 94.6 82Z" fill="#8b0000"/><path d="M60 62 L94.6 82 A40 40 0 0 1 25.4 82Z" fill="#111"/>
+            <path d="M60 62 L25.4 82 A40 40 0 0 1 60 22Z" fill="#8b0000"/>
+            <!-- inner ring -->
+            <circle cx="60" cy="62" r="22" fill="#1a0020" stroke="#ff44aa" stroke-width="1.5"/>
+            <circle cx="60" cy="62" r="14" fill="#0e0015"/>
+            <!-- numbers -->
+            <text x="60" y="40" font-family="Outfit" font-size="9" fill="#fff" text-anchor="middle" font-weight="700">17</text>
+            <text x="84" y="74" font-family="Outfit" font-size="9" fill="#fff" text-anchor="middle" font-weight="700">5</text>
+            <text x="36" y="74" font-family="Outfit" font-size="9" fill="#fff" text-anchor="middle" font-weight="700">32</text>
+            <!-- ball -->
+            <circle cx="60" cy="28" r="5" fill="url(#ballG)"/>
+            <!-- pointer -->
+            <polygon points="60,14 56,22 64,22" fill="#ff44aa"/>
+            <defs><radialGradient id="ballG" cx="35%" cy="35%"><stop offset="0%" stop-color="#fff"/><stop offset="100%" stop-color="#ccc"/></radialGradient></defs>
+          </svg></div>
+          <span class="cbadge">ROULETTE</span><span class="cdisplay">REME</span>
+        </div>
+        <div class="cbody"><div class="cname">Reme</div><div class="cdesc">Pilih nomor atau warna, putar roda roulette!</div>
+        <div class="cmeta"><span class="ctag">Roulette</span><span class="cplay">Play →</span></div></div>
+      </div>
+
+      <!-- TOWER -->
+      <div class="gcard g-tower" id="card-tower" onclick="openG('tower')">
+        <div class="cart"><div class="cart-bg"></div><div class="orb1"></div><div class="orb2"></div><div class="orb3"></div><div class="cart-dots"></div>
+          <div class="cart-art"><svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+            <!-- Tower floors -->
+            <rect x="20" y="96" width="80" height="16" rx="6" fill="#2a1500" stroke="#ffaa00" stroke-width="1.5"/>
+            <rect x="24" y="78" width="72" height="16" rx="6" fill="#251200" stroke="#ffaa00" stroke-width="1.5"/>
+            <rect x="28" y="60" width="64" height="16" rx="6" fill="#201000" stroke="#ffcc44" stroke-width="1.5"/>
+            <rect x="32" y="42" width="56" height="16" rx="6" fill="#2a1800" stroke="#ffcc44" stroke-width="1.5"/>
+            <rect x="36" y="24" width="48" height="16" rx="6" fill="#1e1000" stroke="#fbbf24" stroke-width="2"/>
+            <!-- Stars at top -->
+            <text x="60" y="20" font-size="14" text-anchor="middle">⭐</text>
+            <!-- gems on floors -->
+            <text x="45" y="108" font-size="11">💎</text><text x="75" y="108" font-size="11">💣</text>
+            <text x="40" y="90" font-size="11">💎</text><text x="80" y="90" font-size="11">💎</text>
+            <text x="60" y="72" font-size="11">💎</text>
+          </svg></div>
+          <span class="cbadge">TOWER</span><span class="cdisplay">CLIMB</span>
+        </div>
+        <div class="cbody"><div class="cname">Tower</div><div class="cdesc">Panjat lantai demi lantai, hindari bom tersembunyi.</div>
+        <div class="cmeta"><span class="ctag">Climb</span><span class="cplay">Play →</span></div></div>
+      </div>
+
+      <!-- DICE -->
+      <div class="gcard g-dice" id="card-dice" onclick="openG('dice')">
+        <div class="cart"><div class="cart-bg"></div><div class="orb1"></div><div class="orb2"></div><div class="orb3"></div><div class="cart-dots"></div>
+          <div class="cart-art"><svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+            <!-- Main dice -->
+            <rect x="22" y="30" width="60" height="60" rx="12" fill="#e8f4ff" stroke="#44ddff" stroke-width="2"/>
+            <circle cx="37" cy="45" r="5" fill="#44ddff"/>
+            <circle cx="52" cy="60" r="5" fill="#44ddff"/>
+            <circle cx="67" cy="60" r="5" fill="#44ddff"/>
+            <circle cx="52" cy="45" r="5" fill="#44ddff"/>
+            <circle cx="67" cy="45" r="5" fill="#44ddff"/>
+            <circle cx="52" cy="75" r="5" fill="#44ddff"/>
+            <!-- Shadow dice behind -->
+            <rect x="38" y="22" width="60" height="60" rx="12" fill="rgba(68,221,255,.12)" stroke="rgba(68,221,255,.3)" stroke-width="1.5"/>
+            <!-- sparkles -->
+            <text x="88" y="100" font-size="16">✨</text>
+            <text x="8" y="40" font-size="14">🎲</text>
+          </svg></div>
+          <span class="cbadge">DICE</span><span class="cdisplay">ROLL</span>
+        </div>
+        <div class="cbody"><div class="cname">Dice</div><div class="cdesc">Tebak angka dadu. Tepat = spin 3×, dekat = spin 2×.</div>
+        <div class="cmeta"><span class="ctag">Prediction</span><span class="cplay">Roll →</span></div></div>
+      </div>
+
+      <!-- CROSS THE ROAD -->
+      <div class="gcard g-road" id="card-road" onclick="openG('road')">
+        <div class="cart"><div class="cart-bg"></div><div class="orb1"></div><div class="orb2"></div><div class="orb3"></div><div class="cart-dots"></div>
+          <div class="cart-art"><svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+            <!-- Road lanes -->
+            <rect x="10" y="75" width="100" height="18" rx="4" fill="#1a1a1a" stroke="#333" stroke-width="1"/>
+            <rect x="10" y="53" width="100" height="18" rx="4" fill="#1a1a1a" stroke="#333" stroke-width="1"/>
+            <!-- River -->
+            <rect x="10" y="31" width="100" height="18" rx="4" fill="#0a1e2a" stroke="#1a4060" stroke-width="1"/>
+            <!-- Dashes on road -->
+            <rect x="25" y="83" width="12" height="3" rx="1" fill="#555"/>
+            <rect x="55" y="83" width="12" height="3" rx="1" fill="#555"/>
+            <rect x="85" y="83" width="12" height="3" rx="1" fill="#555"/>
+            <!-- Cars -->
+            <text x="30" y="73" font-size="16">🚗</text>
+            <text x="68" y="55" font-size="16">🚌</text>
+            <!-- Log in river -->
+            <text x="48" y="45" font-size="16">🪵</text>
+            <!-- Chicken -->
+            <text x="52" y="110" font-size="22">🐔</text>
+            <!-- Finish flag -->
+            <text x="50" y="25" font-size="18">🏁</text>
+          </svg></div>
+          <span class="cbadge">ARCADE</span><span class="cdisplay">ROAD</span>
+        </div>
+        <div class="cbody"><div class="cname">Cross Road</div><div class="cdesc">Bantu ayam menyeberang! Capai ujung untuk menang.</div>
+        <div class="cmeta"><span class="ctag">Arcade</span><span class="cplay">Play →</span></div></div>
+      </div>
+
+    </div>
+  </div>
+</div><!-- /lobby -->
+
+<!-- GAME PAGE -->
+<div id="gpage">
+  <button class="backbtn" onclick="closeG()">← Kembali ke Lobby</button>
+
+  <!-- ══ MINES ══ -->
+  <div id="p-mines" class="panel">
+    <div class="paccent pa-mines"></div>
+    <div class="g2col">
+      <div class="ctrl" style="display:flex;flex-direction:column;gap:12px">
+        <div class="ptitle">💣 Mines</div>
+        <p style="font-size:12px;color:#555;line-height:1.6">Ungkap tile aman. Cash out kapan saja untuk memicu slot hadiah. Kena bom = game over.</p>
+        <div>
+          <label class="flbl">Mines: <span id="mcl">3</span></label>
+          <input id="mcnt" type="range" min="1" max="15" value="3" style="width:100%;accent-color:#ff5533"
+            oninput="document.getElementById('mcl').textContent=this.value;mprev()"/>
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:#333;margin-top:4px"><span>1</span><span>15</span></div>
+        </div>
+        <div class="sbox">
+          <div class="srow"><span class="slbl">Tile aman tersisa</span><span class="sval" id="msafe">22</span></div>
+          <div class="srow"><span class="slbl">Tiles dibuka</span><span class="sval" id="mopened">0</span></div>
+          <div class="srow"><span class="slbl">Multiplier</span><span class="sval" id="mmult" style="color:#ff7755">1.00×</span></div>
+        </div>
+        <div id="msbw"><button class="pbtn" onclick="startMines()" style="background:#ff5533;color:#fff">Mulai Game</button></div>
+        <div id="mcow" style="display:none;flex-direction:column;gap:8px">
+          <button class="gbtn" onclick="cashMines()" style="background:#ff5533;color:#fff">🎰 Cash Out & Spin Hadiah</button>
+          <button class="ghost" onclick="giveupMines()">Menyerah</button>
+        </div>
+        <div id="mmsg" style="display:none;font-family:'Outfit',sans-serif;font-weight:700;font-size:14px;text-align:center;padding:10px;border-radius:10px"></div>
+      </div>
+      <div class="garea"><div id="mgrid" style="display:grid;grid-template-columns:repeat(5,1fr);gap:5px;user-select:none"></div></div>
+    </div>
+  </div>
+
+  <!-- ══ CRASH ══ -->
+  <div id="p-crash" class="panel">
+    <div class="paccent pa-crash"></div>
+    <div class="g2col">
+      <div class="ctrl" style="display:flex;flex-direction:column;gap:12px">
+        <div class="ptitle">📈 Crash</div>
+        <p style="font-size:12px;color:#555;line-height:1.6">Tonton roket terbang. Cash out sebelum crash untuk memicu slot hadiah.</p>
+        <div class="sbox">
+          <div class="srow"><span class="slbl">Status</span><span class="sval" id="cstat">Menunggu</span></div>
+          <div class="srow"><span class="slbl">Multiplier</span><span class="sval" id="cmult-s" style="color:#00ff88">—</span></div>
+          <div class="srow"><span class="slbl">Spin didapat</span><span class="sval" id="ctier">—</span></div>
+        </div>
+        <button class="pbtn" id="csbtn" onclick="startCrash()" style="background:#00ff88;color:#000">🚀 Launch Rocket</button>
+        <div id="ccow" style="display:none"><button class="gbtn" onclick="cashCrash()" style="background:#00ff88;color:#000">🎰 Cash Out & Spin</button></div>
+      </div>
+      <div class="garea" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:320px;gap:12px">
+        <div class="crashbig" id="cmult" style="color:#fff">1.00×</div>
+        <canvas id="ccanvas" style="width:100%;max-width:480px;height:170px"></canvas>
+        <div id="chist" style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ WHEEL ══ -->
+  <div id="p-wheel" class="panel">
+    <div class="paccent pa-wheel"></div>
+    <div class="g2col">
+      <div class="ctrl" style="display:flex;flex-direction:column;gap:12px">
+        <div class="ptitle">🎡 Wheel</div>
+        <p style="font-size:12px;color:#555;line-height:1.6">Putar roda sekali. Posisi jarum menentukan tier hadiahmu.</p>
+        <div class="sbox">
+          <div class="srow"><span class="slbl">Segmen</span><span class="sval">12</span></div>
+          <div class="srow"><span class="slbl">Tier tertinggi</span><span class="sval" style="color:#fbbf24">Diskon 50%</span></div>
+          <div class="srow"><span class="slbl">Peluang tidak menang</span><span class="sval" style="color:#f87171">75%</span></div>
+        </div>
+        <button class="pbtn" id="spbtn" onclick="spinWheel()" style="background:#bb77ff;color:#fff">🎡 Putar Roda!</button>
+        <div id="wres" style="text-align:center;font-family:'Outfit',sans-serif;font-size:15px;font-weight:800;min-height:24px"></div>
+      </div>
+      <div class="garea" style="display:flex;align-items:center;justify-content:center">
+        <div style="position:relative;display:inline-block">
+          <div class="wptr"></div>
+          <canvas id="wcanv" width="300" height="300"></canvas>
+          <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none">
+            <div style="width:34px;height:34px;border-radius:50%;background:#fff;border:4px solid #0b0b12;box-shadow:0 0 14px rgba(255,255,255,.4)"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ HILO ══ -->
+  <div id="p-hilo" class="panel">
+    <div class="paccent pa-hilo"></div>
+    <div class="g2col">
+      <div class="ctrl" style="display:flex;flex-direction:column;gap:12px">
+        <div class="ptitle">🃏 Hi-Lo</div>
+        <p style="font-size:12px;color:#555;line-height:1.6">Tebak 3 kartu beruntun dengan benar untuk memicu slot hadiah. Salah = game over.</p>
+        <div class="sbox">
+          <div class="srow"><span class="slbl">Tebakan benar</span><span class="sval" id="hlst">0 / 3</span></div>
+          <div class="srow"><span class="slbl">Menang pada</span><span class="sval" style="color:#33bbff">3 benar beruntun</span></div>
+        </div>
+        <div id="hlsw"><button class="pbtn" onclick="startHilo()" style="background:#33bbff;color:#000">Mulai Ronde</button></div>
+        <div id="hlaw" style="display:none;flex-direction:column;gap:8px">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <button onclick="hlGuess('higher')" style="padding:13px;border-radius:12px;background:#15803d;color:#fff;font-family:'Outfit',sans-serif;font-weight:800;font-size:14px;cursor:pointer;border:none">⬆ Higher</button>
+            <button onclick="hlGuess('lower')" style="padding:13px;border-radius:12px;background:#dc2626;color:#fff;font-family:'Outfit',sans-serif;font-weight:800;font-size:14px;cursor:pointer;border:none">⬇ Lower</button>
+          </div>
+        </div>
+      </div>
+      <div class="garea" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;min-height:300px">
+        <div id="hlhist" style="display:flex;gap:5px;flex-wrap:wrap;justify-content:center;max-width:340px"></div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:10px">
+          <div style="font-size:10px;color:#333;letter-spacing:1.5px;text-transform:uppercase">Kartu Sekarang</div>
+          <div id="hlcard" class="pcard"><span id="hlval" style="font-size:2rem;font-weight:900">?</span><span id="hlsuit" style="font-size:1rem;position:absolute;bottom:6px;right:8px">?</span></div>
+          <div id="hlfb" style="font-family:'Outfit',sans-serif;font-weight:700;font-size:16px;min-height:22px"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ REME ══ -->
+  <div id="p-reme" class="panel">
+    <div class="paccent pa-reme"></div>
+    <div class="g2col">
+      <div class="ctrl" style="display:flex;flex-direction:column;gap:12px">
+        <div class="ptitle">🎡 Reme</div>
+        <p style="font-size:12px;color:#555;line-height:1.6">Kamu vs Bot! Putar roda masing-masing. <b style="color:#ff88cc">Jumlah digit terbesar menang</b>. Misal 27→9, 26→8, jadi 27 menang. Angka <b style="color:#fbbf24">0 = jackpot 3×</b>. Bot dapat 0/28/19 = kalah otomatis.</p>
+        <div class="sbox">
+          <div class="srow"><span class="slbl">Angka Kamu</span><span class="sval" id="reme-player-num" style="color:#ff88cc">—</span></div>
+          <div class="srow"><span class="slbl">Angka Bot 🤖</span><span class="sval" id="reme-bot-num" style="color:#f87171">—</span></div>
+          <div class="srow"><span class="slbl">Hasil</span><span class="sval" id="reme-result">—</span></div>
+        </div>
+        <div style="background:rgba(255,68,170,.06);border:1px solid rgba(255,68,170,.15);border-radius:10px;padding:10px;font-size:11px;color:#aa5577;line-height:1.7">
+          🔢 <b style="color:#ff88cc">Jumlah digit terbesar</b> = menang<br>
+          Misal: 36→9, 27→9, 18→9 (seri = bot menang)<br>
+          Kamu dapat <b style="color:#fbbf24">0</b> = jackpot 3× spin<br>
+          Bot dapat <b style="color:#f87171">0, 28, 19</b> = kamu kalah otomatis
+        </div>
+        <button class="pbtn" id="reme-spin-btn" onclick="spinReme()" style="background:#ff44aa;color:#fff">🎡 Putar Kedua Roda!</button>
+        <div id="reme-again-wrap" style="display:none">
+          <button class="ghost" onclick="resetReme()">Main Lagi</button>
+        </div>
+      </div>
+      <div class="garea" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;min-height:320px">
+        <div style="display:flex;gap:24px;align-items:flex-end">
+          <div style="text-align:center">
+            <div style="font-size:10px;color:#555;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px">Kamu 👤</div>
+            <canvas id="reme-canvas-p" width="120" height="120" style="border-radius:50%;border:2px solid rgba(255,68,170,.3)"></canvas>
+            <div id="reme-p-num" style="font-family:'Outfit',sans-serif;font-weight:900;font-size:36px;color:#ff88cc;margin-top:8px;min-height:44px">?</div>
+          </div>
+          <div style="font-family:'Outfit',sans-serif;font-weight:900;font-size:22px;color:#444;padding-bottom:30px">VS</div>
+          <div style="text-align:center">
+            <div style="font-size:10px;color:#555;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px">Bot 🤖</div>
+            <canvas id="reme-canvas-b" width="120" height="120" style="border-radius:50%;border:2px solid rgba(248,113,113,.3)"></canvas>
+            <div id="reme-b-num" style="font-family:'Outfit',sans-serif;font-weight:900;font-size:36px;color:#f87171;margin-top:8px;min-height:44px">?</div>
+          </div>
+        </div>
+        <div id="reme-verdict" style="font-family:'Outfit',sans-serif;font-weight:900;font-size:20px;text-align:center;min-height:28px"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ TOWER ══ -->
+  <div id="p-tower" class="panel">
+    <div class="paccent pa-tower"></div>
+    <div class="g2col">
+      <div class="ctrl" style="display:flex;flex-direction:column;gap:12px">
+        <div class="ptitle">🏰 Tower</div>
+        <p style="font-size:12px;color:#555;line-height:1.6">Panjat lantai per lantai. Di setiap lantai ada tile aman dan bom. Salah pilih = jatuh!</p>
+        <div>
+          <label class="flbl">Bom per lantai</label>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px">
+            <button onclick="setTowerDiff(1,this)" class="tower-diff-btn" style="padding:8px;border-radius:10px;background:#fff;color:#000;font-family:'Outfit',sans-serif;font-size:12px;font-weight:700;border:none;cursor:pointer">Easy (1💣)</button>
+            <button onclick="setTowerDiff(2,this)" class="tower-diff-btn" style="padding:8px;border-radius:10px;background:rgba(255,255,255,.06);color:#666;font-family:'Outfit',sans-serif;font-size:12px;font-weight:700;border:1px solid rgba(255,255,255,.1);cursor:pointer">Med (2💣)</button>
+            <button onclick="setTowerDiff(3,this)" class="tower-diff-btn" style="padding:8px;border-radius:10px;background:rgba(255,255,255,.06);color:#666;font-family:'Outfit',sans-serif;font-size:12px;font-weight:700;border:1px solid rgba(255,255,255,.1);cursor:pointer">Hard (3💣)</button>
+          </div>
+        </div>
+        <div class="sbox">
+          <div class="srow"><span class="slbl">Lantai saat ini</span><span class="sval" id="tower-floor">0 / 8</span></div>
+          <div class="srow"><span class="slbl">Multiplier</span><span class="sval" id="tower-mult" style="color:#ffaa00">1.00×</span></div>
+        </div>
+        <div id="tower-start-wrap"><button class="pbtn" onclick="startTower()" style="background:#ffaa00;color:#000">Mulai Panjat!</button></div>
+        <div id="tower-cashout-wrap" style="display:none;flex-direction:column;gap:8px">
+          <button class="gbtn" onclick="cashTower()" style="background:#ffaa00;color:#000">🎰 Cash Out & Spin</button>
+        </div>
+        <div id="tower-msg" style="display:none;font-family:'Outfit',sans-serif;font-weight:700;font-size:14px;text-align:center;padding:10px;border-radius:10px"></div>
+      </div>
+      <div class="garea" style="display:flex;flex-direction:column;justify-content:center;gap:0">
+        <div style="text-align:center;margin-bottom:8px;font-size:12px;color:#555">🏆 Finish</div>
+        <div id="tower-grid"></div>
+        <div style="text-align:center;margin-top:8px;font-size:12px;color:#555">🚀 Start</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ DICE ══ -->
+  <div id="p-dice" class="panel">
+    <div class="paccent pa-dice"></div>
+    <div class="g2col">
+      <div class="ctrl" style="display:flex;flex-direction:column;gap:12px">
+        <div class="ptitle">🎲 Dice</div>
+        <p style="font-size:12px;color:#555;line-height:1.6">Pilih angka 1-6. Tepat = 3 spin slot, selisih 1 = 2 spin, selisih 2 = 1 spin, lebih jauh = tidak menang.</p>
+        <div>
+          <label class="flbl">Tebak angka dadu</label>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px">
+            <button onclick="setDiceGuess(1,this)" class="dice-target-btn">1</button>
+            <button onclick="setDiceGuess(2,this)" class="dice-target-btn">2</button>
+            <button onclick="setDiceGuess(3,this)" class="dice-target-btn">3</button>
+            <button onclick="setDiceGuess(4,this)" class="dice-target-btn">4</button>
+            <button onclick="setDiceGuess(5,this)" class="dice-target-btn">5</button>
+            <button onclick="setDiceGuess(6,this)" class="dice-target-btn">6</button>
+          </div>
+        </div>
+        <div class="sbox">
+          <div class="srow"><span class="slbl">Tebakan kamu</span><span class="sval" id="dice-guess-display" style="color:#44ddff">—</span></div>
+          <div class="srow"><span class="slbl">Hasil dadu</span><span class="sval" id="dice-result">—</span></div>
+          <div class="srow"><span class="slbl">Spin didapat</span><span class="sval" id="dice-spins">—</span></div>
+        </div>
+        <button class="pbtn" id="dice-roll-btn" onclick="rollDice()" style="background:#44ddff;color:#000" disabled>🎲 Lempar Dadu!</button>
+      </div>
+      <div class="garea" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;min-height:300px">
+        <!-- visual dice display -->
+        <div id="dice-display">
+          <div class="dice-face" id="dice-face">
+            <div></div><div></div><div></div>
+            <div></div><div class="dot"></div><div></div>
+            <div></div><div></div><div></div>
+          </div>
+        </div>
+        <div id="dice-msg" style="font-family:'Outfit',sans-serif;font-weight:900;font-size:22px;text-align:center;min-height:30px"></div>
+        <!-- dice history -->
+        <div id="dice-hist" style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center;max-width:300px"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ CROSS THE ROAD ══ -->
+  <div id="p-road" class="panel">
+    <div class="paccent pa-road"></div>
+    <div class="g2col">
+      <div class="ctrl" style="display:flex;flex-direction:column;gap:12px">
+        <div class="ptitle">🐔 Cross Road</div>
+        <p style="font-size:12px;color:#555;line-height:1.6">Bantu ayam menyeberangi jalan! Setiap jalanan berhasil dilalui = multiplier naik. Capai ujung = spin slot!</p>
+        <div class="sbox">
+          <div class="srow"><span class="slbl">Posisi</span><span class="sval" id="road-pos">Start</span></div>
+          <div class="srow"><span class="slbl">Multiplier</span><span class="sval" id="road-mult" style="color:#44ff44">1.00×</span></div>
+          <div class="srow"><span class="slbl">Status</span><span class="sval" id="road-status">Siap</span></div>
+        </div>
+        <!-- Cash out option -->
+        <div id="road-cashout-wrap" style="display:none">
+          <button class="gbtn" onclick="cashoutRoad()" style="background:#44ff44;color:#000">🎰 Cash Out & Spin!</button>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <button id="road-start-btn" class="pbtn" onclick="startRoad()" style="background:#44ff44;color:#000">🐔 Mulai!</button>
+          <button class="ghost" onclick="resetRoad()" id="road-reset-btn" style="display:none">↺ Reset</button>
+        </div>
+        <div id="road-controls" style="display:none;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px">
+          <button class="road-btn up" onclick="moveChicken(1)">⬆ Maju</button>
+          <button class="road-btn down" onclick="moveChicken(-1)">⬇ Mundur</button>
+        </div>
+        <div id="road-msg" style="display:none;font-family:'Outfit',sans-serif;font-weight:700;font-size:14px;text-align:center;padding:10px;border-radius:10px"></div>
+        <div style="font-size:11px;color:#333;text-align:center">⌨️ Juga bisa pakai tombol ↑↓</div>
+      </div>
+      <div class="garea" style="padding:0;overflow:hidden;border-radius:18px">
+        <div id="road-grid" class="road-wrap"></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /gpage -->
+
+<!-- SLOT OVERLAY -->
+<div id="slot-overlay" class="slot-overlay hidden">
+  <div class="slot-box">
+    <div class="slot-title">🎰 Slot Hadiah</div>
+    <div class="slot-sub" id="slot-sub">Putar untuk cek hadiahmu!</div>
+    <div class="spin-count">Sisa spin: <span id="spin-count-display">3</span></div>
+    <div class="reels">
+      <div class="reel" id="reel0"><div class="reel-inner" id="ri0">🎁</div></div>
+      <div class="reel" id="reel1"><div class="reel-inner" id="ri1">🎁</div></div>
+      <div class="reel" id="reel2"><div class="reel-inner" id="ri2">🎁</div></div>
+    </div>
+    <div id="result-banner" class="result-banner lost" style="display:none">
+      <div id="result-prize" class="result-prize"></div>
+      <div id="result-discount" class="result-discount" style="display:none"></div>
+      <div id="result-detail" class="result-detail"></div>
+    </div>
+    <div class="slot-actions">
+      <button id="spin-btn" class="spin-again-btn" onclick="doSpin()">🎰 Putar!</button>
+      <a id="tg-btn" class="tg-btn" href="https://t.me/novalogurl" target="_blank" style="display:none">📩 Klaim Diskon via Telegram</a>
+      <button class="close-slot-btn" onclick="closeSlot()">Tutup</button>
+    </div>
+  </div>
+</div>
+
+<!-- POPUP -->
+<div id="olay" class="olay off" onclick="closeOv()">
+  <div class="pbox" onclick="event.stopPropagation()">
+    <div id="pemo" style="font-size:52px;margin-bottom:12px"></div>
+    <div id="ptit" style="font-family:'Outfit',sans-serif;font-weight:900;font-size:22px;color:#fff;margin-bottom:8px"></div>
+    <div id="psub" style="font-size:13px;color:#555;margin-bottom:22px;line-height:1.5"></div>
+    <button onclick="closeOv()" style="padding:9px 24px;border-radius:10px;background:#fff;color:#000;font-family:'Outfit',sans-serif;font-weight:800;font-size:13px;cursor:pointer;border:none">OK</button>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════
+// SESSION TRACKING
+// ════════════════════════════════════════
+const playedGames=new Set();
+function hasPlayed(id){return playedGames.has(id);}
+function markPlayed(id){playedGames.add(id);updateLobby();}
+function updateLobby(){
+  document.querySelectorAll('.gcard').forEach(c=>{if(hasPlayed(c.id.replace('card-','')))c.classList.add('disabled');});
+  if(playedGames.size>=8){const b=document.getElementById('sbadge');b.classList.add('done');b.innerHTML='🚫 Semua game sudah dimainkan sesi ini';}
+}
+
+// ════════════════════════════════════════
+// SLOT MACHINE
+// ════════════════════════════════════════
+const SYMS=['💎','⭐','🎯','🔮','🎁','💀'];
+const DISCOUNTS=[
+  {syms:['💎','💎','💎'],label:'JACKPOT! Diskon 50%',pct:50,color:'#fbbf24'},
+  {syms:['⭐','⭐','⭐'],label:'Diskon 30%',pct:30,color:'#facc15'},
+  {syms:['🎯','🎯','🎯'],label:'Diskon 20%',pct:20,color:'#93c5fd'},
+  {syms:['🔮','🔮','🔮'],label:'Diskon 15%',pct:15,color:'#c4b5fd'},
+  {syms:['🎁','🎁','🎁'],label:'Diskon 10%',pct:10,color:'#86efac'},
+  {syms:null,label:'Tidak Menang',pct:0,color:'#555'},
+];
+let slotSess={spinsLeft:0,outcome:null};
+function decideOutcome(){
+  const r=Math.random()*100;
+  if(r<.5) return 0;if(r<2.5) return 1;if(r<7.5) return 2;if(r<15) return 3;if(r<25) return 4;return 5;
+}
+function openSlot(spins=3,forcedOutcome=null){
+  slotSess={spinsLeft:spins,outcome:forcedOutcome!==null?forcedOutcome:decideOutcome()};
+  for(let i=0;i<3;i++){document.getElementById('reel'+i).classList.remove('win');document.getElementById('reel'+i).style.setProperty('--win-col','');}
+  document.getElementById('result-banner').style.display='none';
+  document.getElementById('tg-btn').style.display='none';
+  document.getElementById('spin-btn').disabled=false;
+  document.getElementById('spin-btn').textContent='🎰 Putar!';
+  document.getElementById('slot-sub').textContent='Putar untuk cek hadiahmu!';
+  ['ri0','ri1','ri2'].forEach(id=>document.getElementById(id).textContent='🎁');
+  updateSpinCount();
+  document.getElementById('slot-overlay').classList.remove('hidden');
+}
+function updateSpinCount(){document.getElementById('spin-count-display').textContent=slotSess.spinsLeft;}
+let spinning=false;
+function doSpin(){
+  if(spinning||slotSess.spinsLeft<=0) return;
+  spinning=true;slotSess.spinsLeft--;updateSpinCount();
+  document.getElementById('spin-btn').disabled=true;
+  document.getElementById('result-banner').style.display='none';
+  document.getElementById('tg-btn').style.display='none';
+  for(let i=0;i<3;i++) document.getElementById('reel'+i).classList.add('spinning');
+  const isLast=slotSess.spinsLeft===0,isWin=isLast&&slotSess.outcome<5;
+  let finalSyms;
+  if(isWin) finalSyms=DISCOUNTS[slotSess.outcome].syms;
+  else if(slotSess.outcome<5&&!isLast){
+    const ws=DISCOUNTS[slotSess.outcome].syms[0];
+    finalSyms=Math.random()>.5?[ws,ws,SYMS.find(s=>s!==ws)||'💀']:[ws,SYMS.find(s=>s!==ws)||'💀',ws];
+  } else {finalSyms=[SYMS[0],SYMS[2],SYMS[4]];}
+  [750,900,1050].forEach((d,i)=>setTimeout(()=>{document.getElementById('reel'+i).classList.remove('spinning');document.getElementById('ri'+i).textContent=finalSyms[i];},d));
+  setTimeout(()=>{spinning=false;showSlotResult(finalSyms,isWin,isLast);},1200);
+}
+function showSlotResult(syms,isWin,isLast){
+  const banner=document.getElementById('result-banner');
+  const prEl=document.getElementById('result-prize');
+  const discEl=document.getElementById('result-discount');
+  const detEl=document.getElementById('result-detail');
+  const tgBtn=document.getElementById('tg-btn');
+  const spinBtn=document.getElementById('spin-btn');
+  if(isWin){
+    const d=DISCOUNTS[slotSess.outcome];
+    for(let i=0;i<3;i++){document.getElementById('reel'+i).style.setProperty('--win-col',d.color);document.getElementById('reel'+i).classList.add('win');}
+    banner.className='result-banner won';prEl.textContent='🎉 '+d.label;prEl.style.color=d.color;
+    discEl.style.display='block';discEl.textContent=d.pct+'% OFF';
+    detEl.textContent='Screenshot ini dan klaim diskon '+d.pct+'% produk NovaStore via Telegram!';
+    banner.style.display='block';tgBtn.style.display='block';
+    spinBtn.disabled=true;spinBtn.textContent='✅ Selesai';
+    document.getElementById('slot-sub').textContent='Selamat! Kamu menang diskon!';
+  } else if(isLast){
+    banner.className='result-banner lost';prEl.textContent='😔 Tidak Menang';prEl.style.color='#555';
+    discEl.style.display='none';detEl.textContent='Tidak ada kecocokan. Lebih beruntung lain kali!';
+    banner.style.display='block';spinBtn.disabled=true;spinBtn.textContent='❌ Tidak menang';
+    document.getElementById('slot-sub').textContent='Sayang sekali, tidak ada match.';
+  } else if(slotSess.spinsLeft>0){
+    spinBtn.disabled=false;spinBtn.textContent='🎰 Putar Lagi! ('+slotSess.spinsLeft+' sisa)';
+    if(slotSess.outcome<5) document.getElementById('slot-sub').textContent='⚡ Hampir! Coba lagi...';
+  }
+}
+function closeSlot(){document.getElementById('slot-overlay').classList.add('hidden');updateLobby();if(document.getElementById('gpage').classList.contains('on'))closeG();}
+
+// ════════════════════════════════════════
+// NAVIGATION
+// ════════════════════════════════════════
+function openG(id){
+  if(hasPlayed(id)){alert('Kamu sudah memainkan game ini dalam sesi ini!');return;}
+  document.getElementById('lobby').style.display='none';
+  document.getElementById('gpage').classList.add('on');
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
+  document.getElementById('p-'+id).classList.add('on');
+  if(id==='wheel')setTimeout(drawWheel,60);
+  if(id==='mines')mprev();
+  if(id==='reme')initReme();
+  if(id==='tower')initTower();
+  if(id==='road')initRoad();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function closeG(){document.getElementById('lobby').style.display='';document.getElementById('gpage').classList.remove('on');window.scrollTo({top:0,behavior:'smooth'});}
+function pop(e,t,s){document.getElementById('pemo').textContent=e;document.getElementById('ptit').textContent=t;document.getElementById('psub').textContent=s;document.getElementById('olay').classList.remove('off');}
+function closeOv(){document.getElementById('olay').classList.add('off');}
+
+// ════════════════════════════════════════
+// MINES
+// ════════════════════════════════════════
+let MS={};const GS=25;
+function calcM(sr,mc){if(!sr)return 1;let p=1;for(let i=0;i<sr;i++)p*=(GS-mc-i)/(GS-i);return Math.max(1,.97/p);}
+function mprev(){const mc=+document.getElementById('mcnt').value;document.getElementById('msafe').textContent=GS-mc;document.getElementById('mopened').textContent=0;renderMG(false);}
+function renderMG(act){
+  const g=document.getElementById('mgrid');g.innerHTML='';
+  for(let i=0;i<GS;i++){
+    const c=document.createElement('div');c.className='mcell';
+    if(!act){c.innerHTML='<span style="color:#1e1e28;font-size:10px">?</span>';}
+    else{const s=MS.rv[i];
+      if(s==='s'){c.classList.add('ms');c.textContent='💎';}
+      else if(s==='h'){c.classList.add('mh');c.textContent='💥';}
+      else if(s==='r'){c.classList.add('mr');c.textContent='💣';}
+      else{c.innerHTML='<span style="color:#1e1e28;font-size:10px">?</span>';c.onclick=()=>revM(i);}
+    }
+    g.appendChild(c);
+  }
+}
+function startMines(){
+  const mc=+document.getElementById('mcnt').value;
+  MS={on:true,mc,rv:Array(GS).fill(null),sr:0,mines:shuf([...Array(GS).keys()]).slice(0,mc)};
+  document.getElementById('msbw').style.display='none';document.getElementById('mcow').style.display='flex';document.getElementById('mmsg').style.display='none';
+  renderMG(true);updMS();
+}
+function revM(i){
+  if(!MS.on||MS.rv[i])return;
+  if(MS.mines.includes(i)){
+    MS.rv[i]='h';MS.mines.forEach(m=>{if(!MS.rv[m])MS.rv[m]='r';});MS.on=false;renderMG(true);
+    document.getElementById('mcow').style.display='none';document.getElementById('msbw').style.display='block';
+    showMM('💥 Kena bom! Game over.','#f87171');markPlayed('mines');setTimeout(()=>openSlot(1),600);
+  } else {MS.rv[i]='s';MS.sr++;renderMG(true);updMS();}
+}
+function updMS(){
+  const m=calcM(MS.sr,MS.mc);document.getElementById('mmult').textContent=m.toFixed(2)+'×';
+  document.getElementById('msafe').textContent=GS-MS.mc-MS.sr;document.getElementById('mopened').textContent=MS.sr;
+}
+function cashMines(){
+  if(!MS.on||!MS.sr)return;MS.on=false;MS.mines.forEach(mi=>{if(!MS.rv[mi])MS.rv[mi]='r';});renderMG(true);
+  document.getElementById('mcow').style.display='none';document.getElementById('msbw').style.display='block';
+  showMM('✅ Cash out! Memicu slot...','#4ade80');markPlayed('mines');
+  setTimeout(()=>openSlot(MS.sr>=10?3:MS.sr>=5?2:1),600);
+}
+function giveupMines(){
+  MS.on=false;MS.mines.forEach(mi=>{if(!MS.rv[mi])MS.rv[mi]='r';});renderMG(true);
+  document.getElementById('mcow').style.display='none';document.getElementById('msbw').style.display='block';
+  markPlayed('mines');showMM('❌ Menyerah.','#888');
+}
+function showMM(t,c){const el=document.getElementById('mmsg');el.textContent=t;el.style.color=c;el.style.background=c+'18';el.style.border='1px solid '+c+'44';el.style.display='block';}
+function shuf(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+mprev();
+
+// ════════════════════════════════════════
+// CRASH
+// ════════════════════════════════════════
+let CS={},cH=[];
+function gCP(){const r=Math.random();if(r<.35)return 1+r*.5;if(r<.65)return 1.5+Math.random()*1.5;if(r<.85)return 3+Math.random()*5;if(r<.95)return 8+Math.random()*20;return 30+Math.random()*70;}
+function startCrash(){
+  if(CS.on)return;CS={on:true,cp:gCP(),co:false,m:1,pts:[]};
+  document.getElementById('csbtn').disabled=true;document.getElementById('ccow').style.display='block';
+  document.getElementById('cstat').textContent='🚀 Terbang...';document.getElementById('cmult').style.color='#00ff88';
+  const cv=document.getElementById('ccanvas');const ctx=cv.getContext('2d');cv.width=cv.offsetWidth||480;cv.height=170;let t=0;
+  CS.iv=setInterval(()=>{
+    t+=.05;CS.m=1+t*t*.3+t*.1;CS.pts.push({x:t,y:CS.m});
+    ctx.clearRect(0,0,cv.width,cv.height);ctx.strokeStyle='rgba(0,255,136,.06)';ctx.lineWidth=1;
+    for(let x=0;x<cv.width;x+=50){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,cv.height);ctx.stroke();}
+    for(let y=0;y<cv.height;y+=35){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(cv.width,y);ctx.stroke();}
+    if(CS.pts.length>1){
+      const mx=Math.max(t,3),my=Math.max(CS.m,3);ctx.strokeStyle='#00ff88';ctx.lineWidth=2.5;ctx.beginPath();
+      CS.pts.forEach((p,i)=>{const px=p.x/mx*cv.width,py=cv.height-((p.y-1)/(my-1)*(cv.height-20)+10);i?ctx.lineTo(px,py):ctx.moveTo(px,py);});ctx.stroke();
+      const l=CS.pts[CS.pts.length-1],lx=l.x/mx*cv.width,ly=cv.height-((l.y-1)/(my-1)*(cv.height-20)+10);
+      ctx.fillStyle='#00ff88';ctx.beginPath();ctx.arc(lx,ly,5,0,Math.PI*2);ctx.fill();
+    }
+    document.getElementById('cmult').textContent=CS.m.toFixed(2)+'×';document.getElementById('cmult-s').textContent=CS.m.toFixed(2)+'×';
+    document.getElementById('ctier').textContent=CS.m>=5?'3 spin':CS.m>=2?'2 spin':'1 spin';
+    if(CS.m>=CS.cp&&!CS.co){
+      clearInterval(CS.iv);CS.on=false;document.getElementById('cmult').style.color='#f87171';
+      document.getElementById('cmult').textContent='CRASHED @ '+CS.cp.toFixed(2)+'×';document.getElementById('cstat').textContent='💥 Crashed';
+      document.getElementById('ccow').style.display='none';document.getElementById('csbtn').disabled=false;
+      addCH(CS.cp,false);markPlayed('crash');setTimeout(()=>openSlot(1),400);
+    }
+  },80);
+}
+function cashCrash(){
+  if(!CS.on||CS.co)return;CS.co=true;clearInterval(CS.iv);CS.on=false;
+  document.getElementById('cstat').textContent='✅ Cash Out';document.getElementById('ccow').style.display='none';document.getElementById('csbtn').disabled=false;
+  addCH(CS.m,true);markPlayed('crash');setTimeout(()=>openSlot(CS.m>=5?3:CS.m>=2?2:1),300);
+}
+function addCH(m,w){cH.unshift({m,w});if(cH.length>6)cH.pop();document.getElementById('chist').innerHTML=cH.map(h=>`<span style="font-size:11px;padding:3px 9px;border-radius:7px;font-family:'Outfit',sans-serif;font-weight:800;background:${h.w?'rgba(0,255,136,.08)':'rgba(248,113,113,.08)'};color:${h.w?'#00ff88':'#f87171'};border:1px solid ${h.w?'rgba(0,255,136,.18)':'rgba(248,113,113,.18)'}">${h.m.toFixed(2)}×</span>`).join('');}
+
+// ════════════════════════════════════════
+// WHEEL
+// ════════════════════════════════════════
+const WSEGS=[
+  {l:'Tidak\nMenang',col:'#131320',tcol:'#333',tier:null},
+  {l:'Diskon\n10%',col:'#0a1a10',tcol:'#86efac',tier:4},
+  {l:'Tidak\nMenang',col:'#131320',tcol:'#333',tier:null},
+  {l:'Diskon\n15%',col:'#0a0e18',tcol:'#93c5fd',tier:3},
+  {l:'Tidak\nMenang',col:'#131320',tcol:'#333',tier:null},
+  {l:'Diskon\n20%',col:'#0a0e18',tcol:'#7dd3fc',tier:2},
+  {l:'Tidak\nMenang',col:'#131320',tcol:'#333',tier:null},
+  {l:'Diskon\n30%',col:'#14100a',tcol:'#facc15',tier:1},
+  {l:'Tidak\nMenang',col:'#131320',tcol:'#333',tier:null},
+  {l:'Diskon\n10%',col:'#0a1a10',tcol:'#86efac',tier:4},
+  {l:'Tidak\nMenang',col:'#131320',tcol:'#333',tier:null},
+  {l:'Diskon\n50%',col:'#1a1200',tcol:'#fbbf24',tier:0},
+];
+function getWheelW(){const r=Math.random();if(r<.005)return 11;if(r<.025)return 7;if(r<.075)return 5;if(r<.15)return 3;if(r<.25)return 1;if(r<.35)return 9;const nw=[0,2,4,6,8,10];return nw[Math.floor(Math.random()*nw.length)];}
+let wa=0,wSpin=false;
+function drawWheel(a=0){
+  const c=document.getElementById('wcanv');if(!c)return;const ctx=c.getContext('2d');
+  const n=WSEGS.length,cx=150,cy=150,r=136,st=(Math.PI*2)/n;
+  ctx.clearRect(0,0,300,300);
+  WSEGS.forEach((seg,i)=>{
+    const sa=a+i*st-Math.PI/2,ea=sa+st;ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,sa,ea);ctx.closePath();
+    ctx.fillStyle=seg.col;ctx.fill();ctx.strokeStyle='#08080f';ctx.lineWidth=1.5;ctx.stroke();
+    const mid=sa+st/2,tx=cx+Math.cos(mid)*r*.66,ty=cy+Math.sin(mid)*r*.66;
+    ctx.save();ctx.translate(tx,ty);ctx.rotate(mid+Math.PI/2);ctx.fillStyle=seg.tcol;ctx.font='bold 9px Outfit,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+    seg.l.split('\n').forEach((ln,li,arr)=>ctx.fillText(ln,0,(li-(arr.length-1)/2)*11));ctx.restore();
+  });
+  ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.strokeStyle='#2a2a3a';ctx.lineWidth=2.5;ctx.stroke();
+  ctx.beginPath();ctx.arc(cx,cy,r-2,0,Math.PI*2);ctx.strokeStyle='rgba(187,119,255,.25)';ctx.lineWidth=1;ctx.stroke();
+}
+function spinWheel(){
+  if(wSpin)return;wSpin=true;document.getElementById('spbtn').disabled=true;document.getElementById('wres').textContent='';
+  const wi=getWheelW(),n=WSEGS.length,step=(Math.PI*2)/n,full=(5+Math.random()*4)*Math.PI*2,target=-(wi*step)+full;
+  let st2=null,dur=4000;
+  function anim(ts){if(!st2)st2=ts;const p=Math.min((ts-st2)/dur,1),ease=1-Math.pow(1-p,4);wa=ease*target;drawWheel(wa);
+    if(p<1){requestAnimationFrame(anim);}
+    else{wSpin=false;document.getElementById('spbtn').disabled=false;const seg=WSEGS[wi];markPlayed('wheel');
+      if(seg.tier!==null){const spins=seg.tier<=1?3:seg.tier<=2?2:1;document.getElementById('wres').innerHTML=`<span style="color:#bb77ff">🎰 ${seg.l.replace('\n',' ')} — ${spins} spin!</span>`;setTimeout(()=>{openSlot(spins);slotSess.outcome=seg.tier;},500);}
+      else{document.getElementById('wres').innerHTML=`<span style="color:#f87171">😔 Tidak menang</span>`;setTimeout(()=>openSlot(1),500);}
+    }
+  }
+  requestAnimationFrame(anim);
+}
+setTimeout(drawWheel,80);
+
+// ════════════════════════════════════════
+// HI-LO
+// ════════════════════════════════════════
+const VALS=['A','2','3','4','5','6','7','8','9','10','J','Q','K'],SUITS=['♠','♥','♦','♣'];
+let HL={};
+function rc(){return{v:VALS[~~(Math.random()*13)],s:SUITS[~~(Math.random()*4)]};}
+function cvv(c){return VALS.indexOf(c.v)+1;}
+function startHilo(){
+  HL={on:true,card:rc(),str:0};document.getElementById('hlsw').style.display='none';document.getElementById('hlaw').style.display='flex';
+  document.getElementById('hlhist').innerHTML='';document.getElementById('hlfb').textContent='';renderHL(HL.card);updHL();
+}
+function renderHL(card){const red='♥♦'.includes(card.s);document.getElementById('hlcard').className='pcard'+(red?' red':'');document.getElementById('hlval').textContent=card.v;document.getElementById('hlsuit').textContent=card.s;}
+function hlGuess(g){
+  if(!HL.on)return;const next=rc(),cur=cvv(HL.card),nx=cvv(next);const ok=(g==='higher'&&nx>=cur)||(g==='lower'&&nx<=cur);
+  if(ok){HL.str++;const h=document.createElement('div');h.className='pcard'+('♥♦'.includes(HL.card.s)?' red':'');h.style='width:34px;height:48px;border-radius:6px;position:relative;';h.innerHTML=`<span style="font-size:12px;font-weight:900">${HL.card.v}</span><span style="font-size:9px;position:absolute;bottom:2px;right:4px">${HL.card.s}</span>`;document.getElementById('hlhist').appendChild(h);HL.card=next;renderHL(next);document.getElementById('hlfb').innerHTML='<span style="color:#4ade80">✅ Benar! ('+HL.str+'/3)</span>';updHL();
+    if(HL.str>=3){HL.on=false;document.getElementById('hlaw').style.display='none';markPlayed('hilo');setTimeout(()=>openSlot(3),500);}
+  } else {HL.on=false;renderHL(next);document.getElementById('hlfb').innerHTML='<span style="color:#f87171">❌ Salah! Game over.</span>';document.getElementById('hlaw').style.display='none';document.getElementById('hlsw').style.display='block';markPlayed('hilo');setTimeout(()=>openSlot(1),400);}
+}
+function updHL(){document.getElementById('hlst').textContent=HL.str+' / 3';}
+
+// ════════════════════════════════════════
+// REME — Player vs Bot roulette duel (digit sum, highest wins)
+// ════════════════════════════════════════
+// Digit sum wins. e.g. 26→8, 27→9 → 27 wins.
+// Player gets 0 = 3× jackpot. Bot gets 0/28/19 = player loses instantly.
+const REME_NUMS=Array.from({length:37},(_,i)=>i); // 0..36
+let remeState={spinning:false,done:false};
+
+function digitSum(n){ return String(n).split('').reduce((a,d)=>a+parseInt(d),0); }
+
+function initReme(){
+  remeState={spinning:false,done:false};
+  drawRemeWheel('reme-canvas-p',0,'#ff44aa');
+  drawRemeWheel('reme-canvas-b',0,'#f87171');
+  document.getElementById('reme-p-num').textContent='?';
+  document.getElementById('reme-b-num').textContent='?';
+  document.getElementById('reme-verdict').textContent='';
+  document.getElementById('reme-player-num').textContent='—';
+  document.getElementById('reme-bot-num').textContent='—';
+  document.getElementById('reme-result').textContent='—';
+  document.getElementById('reme-spin-btn').disabled=false;
+  document.getElementById('reme-spin-btn').textContent='🎡 Putar Kedua Roda!';
+  document.getElementById('reme-again-wrap').style.display='none';
+}
+
+function drawRemeWheel(canvasId,angle,accentColor){
+  const c=document.getElementById(canvasId);if(!c)return;
+  const ctx=c.getContext('2d'),n=37,cx=60,cy=60,r=56,st=(Math.PI*2)/n;
+  ctx.clearRect(0,0,120,120);
+  for(let i=0;i<n;i++){
+    const num=i,sa=angle+i*st-Math.PI/2,ea=sa+st;
+    const col=num===0?'#013a10':num%2===1?'#3a0008':'#0a0a0a';
+    ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,sa,ea);ctx.closePath();
+    ctx.fillStyle=col;ctx.fill();ctx.strokeStyle='rgba(0,0,0,.4)';ctx.lineWidth=.5;ctx.stroke();
+  }
+  ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.strokeStyle=accentColor;ctx.lineWidth=2;ctx.stroke();
+  ctx.beginPath();ctx.arc(cx,cy,10,0,Math.PI*2);ctx.fillStyle='#0a0a12';ctx.fill();ctx.strokeStyle=accentColor;ctx.lineWidth=1.5;ctx.stroke();
+  ctx.fillStyle=accentColor;ctx.beginPath();ctx.moveTo(cx,4);ctx.lineTo(cx-6,14);ctx.lineTo(cx+6,14);ctx.closePath();ctx.fill();
+}
+
+function animWheel(canvasId,accentColor,targetAngle,dur,onDone){
+  let st2=null;
+  function anim(ts){
+    if(!st2)st2=ts;const p=Math.min((ts-st2)/dur,1),ease=1-Math.pow(1-p,4);
+    drawRemeWheel(canvasId,ease*targetAngle,accentColor);
+    if(p<1){requestAnimationFrame(anim);}else{onDone&&onDone();}
+  }
+  requestAnimationFrame(anim);
+}
+
+function spinReme(){
+  if(remeState.spinning||remeState.done)return;
+  remeState.spinning=true;
+  document.getElementById('reme-spin-btn').disabled=true;
+  document.getElementById('reme-verdict').textContent='';
+  document.getElementById('reme-p-num').textContent='...';
+  document.getElementById('reme-b-num').textContent='...';
+
+  const playerNum=Math.floor(Math.random()*37);
+  const botNum=Math.floor(Math.random()*37);
+  const n=37,step=(Math.PI*2)/n;
+  const playerTarget=-(playerNum*step)+(6+Math.random()*3)*Math.PI*2;
+  const botTarget=-(botNum*step)+(6+Math.random()*3)*Math.PI*2;
+  let playerDone=false,botDone=false;
+
+  function checkBothDone(){
+    if(!playerDone||!botDone)return;
+    remeState.spinning=false;remeState.done=true;
+
+    const pSum=digitSum(playerNum);
+    const bSum=digitSum(botNum);
+    const pCol=playerNum===0?'#fbbf24':'#ff88cc';
+    const bSpecial=botNum===0||botNum===28||botNum===19;
+    const bCol=bSpecial?'#f87171':'#f87171';
+
+    document.getElementById('reme-p-num').innerHTML=
+      `<span style="color:${pCol}">${playerNum}</span><span style="font-size:13px;color:#888;display:block">= ${pSum}</span>`;
+    document.getElementById('reme-b-num').innerHTML=
+      `<span style="color:${bCol}">${botNum}</span><span style="font-size:13px;color:#888;display:block">= ${bSum}</span>`;
+    document.getElementById('reme-player-num').textContent=`${playerNum} (digit: ${pSum})`;
+    document.getElementById('reme-bot-num').textContent=`${botNum} (digit: ${bSum})`;
+
+    let won=false,spins=1,verdictHTML='';
+
+    if(playerNum===0){
+      // Player jackpot — 3× win regardless
+      won=true;spins=3;
+      verdictHTML=`<span style="color:#fbbf24">🎉 JACKPOT! Kamu dapat 0! Menang 3 spin!</span>`;
+      document.getElementById('reme-result').textContent='Jackpot! 0 = kemenangan tertinggi';
+    } else if(bSpecial){
+      // Bot gets cursed number — instant loss
+      won=false;spins=1;
+      verdictHTML=`<span style="color:#f87171">💀 Bot dapat ${botNum} (angka sial)! Kalah otomatis!</span>`;
+      document.getElementById('reme-result').textContent=`Kalah otomatis — bot dapat ${botNum}`;
+    } else if(pSum>bSum){
+      won=true;spins=pSum>=bSum+5?3:2;
+      verdictHTML=`<span style="color:#4ade80">✅ Menang! ${playerNum}(${pSum}) > ${botNum}(${bSum})</span>`;
+      document.getElementById('reme-result').textContent=`Digit kamu ${pSum} > Bot ${bSum}`;
+    } else if(pSum<bSum){
+      won=false;spins=1;
+      verdictHTML=`<span style="color:#f87171">❌ Kalah! ${playerNum}(${pSum}) < ${botNum}(${bSum})</span>`;
+      document.getElementById('reme-result').textContent=`Digit kamu ${pSum} < Bot ${bSum}`;
+    } else {
+      // tie — bot wins (house edge)
+      won=false;spins=1;
+      verdictHTML=`<span style="color:#f87171">🤝 Seri ${pSum}=${bSum} — Bot menang (house edge)</span>`;
+      document.getElementById('reme-result').textContent=`Seri = bot menang`;
+    }
+
+    document.getElementById('reme-verdict').innerHTML=verdictHTML;
+    markPlayed('reme');
+    setTimeout(()=>openSlot(spins,won?null:5),700);
+  }
+
+  animWheel('reme-canvas-p','#ff44aa',playerTarget,4000,()=>{playerDone=true;checkBothDone();});
+  animWheel('reme-canvas-b','#f87171',botTarget,4300,()=>{botDone=true;checkBothDone();});
+}
+
+function resetReme(){initReme();}
+
+// ════════════════════════════════════════
+// TOWER
+// ════════════════════════════════════════
+let TS={bombs:1,rows:8,grid:[],currentRow:7,active:false};
+function setTowerDiff(b,btn){TS.bombs=b;document.querySelectorAll('.tower-diff-btn').forEach(x=>{x.style.background='rgba(255,255,255,.06)';x.style.color='#666';x.style.border='1px solid rgba(255,255,255,.1)';});btn.style.background='#fff';btn.style.color='#000';btn.style.border='none';}
+function initTower(){TS.grid=[];TS.currentRow=7;TS.active=false;renderTower(false);document.getElementById('tower-start-wrap').style.display='block';document.getElementById('tower-cashout-wrap').style.display='none';document.getElementById('tower-msg').style.display='none';}
+function towerMult(row){return parseFloat((1+row*.8*TS.bombs*.4).toFixed(2));}
+function renderTower(active){
+  const g=document.getElementById('tower-grid');g.innerHTML='';const cols=4;
+  // Render rows 7..0 top-to-bottom so row 7=top (finish) and row 0=bottom (start)
+  for(let r=7;r>=0;r--){
+    const row=document.createElement('div');row.className='tower-row';row.id='trow-'+r;
+    if(active){
+      if(r<TS.currentRow) row.classList.add('done');          // already passed
+      else if(r===TS.currentRow) row.classList.add('current'); // active row
+    }
+    for(let c=0;c<cols;c++){
+      const cell=document.createElement('div');cell.className='tower-cell';
+      if(!active){
+        cell.innerHTML='<span style="color:#2a2a3a;font-size:12px">?</span>';
+      } else {
+        const rdata=TS.grid[r];
+        const state=rdata?rdata[c]:'?';
+        if(state==='opened-safe'){cell.classList.add('safe');cell.textContent='💎';}
+        else if(state==='opened-bomb'){cell.classList.add('bomb');cell.textContent='💥';}
+        else if(state==='hidden-bomb'){cell.classList.add('hidden-bomb');cell.textContent='💣';}
+        else {
+          // unrevealed
+          cell.innerHTML='<span style="color:#2a2a3a;font-size:12px">?</span>';
+          if(active && r===TS.currentRow){
+            cell.onclick=(()=>{const cc=c;return()=>clickTowerCell(r,cc);})();
+          }
+        }
+      }
+      row.appendChild(cell);
+    }
+    g.appendChild(row);
+  }
+}
+function startTower(){
+  const cols=4;TS.grid=[];TS.currentRow=0;TS.active=true;
+  for(let r=0;r<8;r++){
+    const row={};const bombs=shuf([0,1,2,3]).slice(0,TS.bombs);
+    for(let c=0;c<cols;c++) row[c]=bombs.includes(c)?'bomb':'safe';
+    TS.grid.push(row);
+  }
+  document.getElementById('tower-start-wrap').style.display='none';document.getElementById('tower-cashout-wrap').style.display='flex';document.getElementById('tower-msg').style.display='none';
+  document.getElementById('tower-floor').textContent='0 / 8';document.getElementById('tower-mult').textContent='1.00×';
+  renderTower(true);
+}
+function clickTowerCell(r,c){
+  if(!TS.active||r!==TS.currentRow)return;
+  const rowData=TS.grid[r];const isBomb=rowData[c]==='bomb';
+  if(isBomb){
+    // reveal all bombs in current row
+    for(let cc=0;cc<4;cc++) if(rowData[cc]==='bomb') rowData[cc]='opened-bomb';
+    rowData[c]='opened-bomb'; // mark clicked
+    TS.active=false;renderTower(true);
+    document.getElementById('tower-cashout-wrap').style.display='none';document.getElementById('tower-start-wrap').style.display='block';
+    const msg=document.getElementById('tower-msg');msg.textContent='💥 Kena bom! Game over di lantai '+r+'.';msg.style.color='#f87171';msg.style.background='rgba(248,113,113,.1)';msg.style.border='1px solid rgba(248,113,113,.3)';msg.style.display='block';
+    markPlayed('tower');setTimeout(()=>openSlot(1),600);
+  } else {
+    rowData[c]='opened-safe';
+    // reveal bombs in this row (show them now)
+    for(let cc=0;cc<4;cc++) if(rowData[cc]==='bomb') rowData[cc]='hidden-bomb';
+    TS.currentRow++;
+    if(TS.currentRow>=8){
+      // reached top = win
+      TS.active=false;renderTower(true);
+      document.getElementById('tower-cashout-wrap').style.display='none';document.getElementById('tower-start-wrap').style.display='block';
+      const msg=document.getElementById('tower-msg');msg.textContent='🏆 Kamu capai puncak! 3 spin slot!';msg.style.color='#fbbf24';msg.style.background='rgba(251,191,36,.1)';msg.style.border='1px solid rgba(251,191,36,.3)';msg.style.display='block';
+      markPlayed('tower');setTimeout(()=>openSlot(3),600);
+    } else {
+      document.getElementById('tower-floor').textContent=TS.currentRow+' / 8';
+      document.getElementById('tower-mult').textContent=towerMult(TS.currentRow)+'×';
+      renderTower(true);
+    }
+  }
+}
+function cashTower(){
+  if(!TS.active||TS.currentRow===0)return;TS.active=false;
+  // reveal all
+  TS.grid.forEach(row=>{for(let c=0;c<4;c++)if(row[c]==='bomb')row[c]='hidden-bomb';});renderTower(true);
+  document.getElementById('tower-cashout-wrap').style.display='none';document.getElementById('tower-start-wrap').style.display='block';
+  const msg=document.getElementById('tower-msg');msg.textContent='✅ Cash out lantai '+TS.currentRow+'!';msg.style.color='#4ade80';msg.style.background='rgba(74,222,128,.1)';msg.style.border='1px solid rgba(74,222,128,.3)';msg.style.display='block';
+  markPlayed('tower');const spins=TS.currentRow>=6?3:TS.currentRow>=3?2:1;setTimeout(()=>openSlot(spins),500);
+}
+
+// ════════════════════════════════════════
+// DICE
+// ════════════════════════════════════════
+let diceGuess=null,diceRolled=false;
+const DICE_DOTS={1:[[1,1]],2:[[0,0],[2,2]],3:[[0,0],[1,1],[2,2]],4:[[0,0],[0,2],[2,0],[2,2]],5:[[0,0],[0,2],[1,1],[2,0],[2,2]],6:[[0,0],[0,2],[1,0],[1,2],[2,0],[2,2]]};
+function setDiceGuess(n,btn){diceGuess=n;document.querySelectorAll('.dice-target-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');document.getElementById('dice-guess-display').textContent=n;document.getElementById('dice-roll-btn').disabled=false;}
+function renderDiceFace(val){
+  const face=document.getElementById('dice-face');face.innerHTML='';
+  const dots=DICE_DOTS[val]||[];const grid=[];for(let r=0;r<3;r++){const row=[];for(let c=0;c<3;c++)row.push(false);grid.push(row);}
+  dots.forEach(([r,c])=>grid[r][c]=true);
+  for(let r=0;r<3;r++)for(let c=0;c<3;c++){const d=document.createElement('div');if(grid[r][c])d.className='dot';face.appendChild(d);}
+}
+function rollDice(){
+  if(diceGuess===null||diceRolled)return;diceRolled=true;document.getElementById('dice-roll-btn').disabled=true;
+  const face=document.getElementById('dice-face');face.classList.add('dice-rolling');
+  // animate
+  let count=0;const anim=setInterval(()=>{renderDiceFace(Math.ceil(Math.random()*6));count++;if(count>10){clearInterval(anim);
+    const result=Math.ceil(Math.random()*6);renderDiceFace(result);face.classList.remove('dice-rolling');
+    const diff=Math.abs(result-diceGuess);const spins=diff===0?3:diff===1?2:diff===2?1:0;
+    document.getElementById('dice-result').textContent=result;document.getElementById('dice-spins').textContent=spins>0?spins+' spin':'0 (tidak menang)';
+    const won=spins>0;document.getElementById('dice-msg').innerHTML=won?`<span style="color:#4ade80">✅ ${diff===0?'Tepat!':'Hampir!'} ${spins} spin</span>`:`<span style="color:#f87171">❌ Selisih ${diff}, tidak menang</span>`;
+    const h=document.createElement('span');h.style=`width:26px;height:26px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;font-family:'Outfit',sans-serif;background:${won?'rgba(68,221,255,.1)':'rgba(255,255,255,.04)'};color:${won?'#44ddff':'#444'};border:1px solid ${won?'rgba(68,221,255,.25)':'rgba(255,255,255,.08)'}`;h.textContent=result;const dh=document.getElementById('dice-hist');dh.insertBefore(h,dh.firstChild);if(dh.children.length>8)dh.removeChild(dh.lastChild);
+    markPlayed('dice');if(won)setTimeout(()=>openSlot(spins),500);else setTimeout(()=>openSlot(1,5),500);
+  }},80);
+}
+
+// ════════════════════════════════════════
+// CROSS THE ROAD — Crossy Road style
+// ════════════════════════════════════════
+const TOTAL_LANES=10;
+const LANE_CFG=[
+  {type:'start', label:'🐔 START',   cls:'lane-safe-start', mult:0},
+  {type:'road',  label:'🚗 Road 1',  cls:'lane-road',       mult:0.25, speed:2.2, density:2},
+  {type:'road',  label:'🚗 Road 2',  cls:'lane-road-alt',   mult:0.25, speed:2.8, density:2},
+  {type:'river', label:'🌊 River 1', cls:'lane-river',      mult:0.5,  speed:1.6, density:3},
+  {type:'road',  label:'🚕 Road 3',  cls:'lane-road',       mult:0.25, speed:3.2, density:3},
+  {type:'road',  label:'🚕 Road 4',  cls:'lane-road-alt',   mult:0.25, speed:3.8, density:2},
+  {type:'river', label:'🌊 River 2', cls:'lane-river',      mult:0.5,  speed:2.2, density:3},
+  {type:'road',  label:'🚌 Road 5',  cls:'lane-road',       mult:0.25, speed:4.2, density:3},
+  {type:'road',  label:'🚌 Road 6',  cls:'lane-road-alt',   mult:0.25, speed:4.8, density:2},
+  {type:'finish',label:'🏁 FINISH',  cls:'lane-finish',     mult:2.0},
+];
+let RD={active:false,chickenLane:0,mult:1.0,obstacles:[],interval:null,frameCount:0,playedOut:false};
+function calcRoadMult(lane){let m=1.0;for(let i=1;i<=lane&&i<TOTAL_LANES;i++)m+=LANE_CFG[i].mult||0;return parseFloat(m.toFixed(2));}
+function setEl(id,prop,val){const el=document.getElementById(id);if(!el)return;const parts=prop.split(".");let obj=el;for(let i=0;i<parts.length-1;i++)obj=obj[parts[i]];obj[parts[parts.length-1]]=val;}
+function initRoad(){
+  if(RD.interval)clearInterval(RD.interval);
+  document.removeEventListener("keydown",roadKeyHandler);
+  RD={active:false,chickenLane:0,mult:1.0,obstacles:[],interval:null,frameCount:0,playedOut:false};
+  buildRoadGrid();
+  setEl("road-start-btn","style.display","block");setEl("road-reset-btn","style.display","none");
+  setEl("road-controls","style.display","none");setEl("road-cashout-wrap","style.display","none");
+  setEl("road-msg","style.display","none");setEl("road-pos","textContent","Start");
+  setEl("road-mult","textContent","1.00x");setEl("road-status","textContent","Siap");
+}
+function buildRoadGrid(){
+  const g=document.getElementById("road-grid");if(!g)return;g.innerHTML="";
+  for(let i=TOTAL_LANES-1;i>=0;i--){
+    const cfg=LANE_CFG[i];
+    const lane=document.createElement("div");lane.className="road-lane "+cfg.cls;lane.id="rl-"+i;
+    const lbl=document.createElement("span");lbl.className="lane-label";lbl.textContent=cfg.label;lane.appendChild(lbl);
+    const ml=document.createElement("span");ml.className="lane-mult";ml.id="lmult-"+i;
+    ml.textContent=i===0?"":"+"+cfg.mult+"x";lane.appendChild(ml);
+    g.appendChild(lane);
+  }
+  placeChicken();
+}
+function placeChicken(){
+  document.querySelectorAll(".road-chicken").forEach(e=>e.remove());
+  const lane=document.getElementById("rl-"+RD.chickenLane);if(!lane)return;
+  const ch=document.createElement("div");ch.className="road-chicken";ch.id="chicken";ch.textContent="🐔";lane.appendChild(ch);
+  document.querySelectorAll(".road-lane").forEach(l=>l.style.outline="none");
+  lane.style.outline="2px solid rgba(68,255,68,.5)";
+}
+function startRoad(){
+  RD.active=true;RD.chickenLane=0;RD.mult=1.0;RD.obstacles=[];RD.frameCount=0;RD.playedOut=false;
+  setEl("road-start-btn","style.display","none");setEl("road-reset-btn","style.display","block");
+  setEl("road-controls","style.display","grid");setEl("road-msg","style.display","none");
+  setEl("road-cashout-wrap","style.display","none");setEl("road-status","textContent","🐔 Jalan!");setEl("road-mult","textContent","1.00x");
+  buildRoadGrid();
+  for(let li=1;li<TOTAL_LANES-1;li++){
+    const cfg=LANE_CFG[li];if(!cfg.speed)continue;
+    for(let j=0;j<(cfg.density||2);j++){
+      const dir=(li%2===1)?1:-1;
+      RD.obstacles.push({lane:li,x:10+Math.random()*80,speed:cfg.speed*(0.7+Math.random()*0.6)*dir,type:cfg.type});
+    }
+  }
+  RD.interval=setInterval(tickRoad,55);
+  document.addEventListener("keydown",roadKeyHandler);
+}
+function roadKeyHandler(e){
+  if(e.key==="ArrowUp"||e.key==="w"||e.key==="W")moveChicken(1);
+  else if(e.key==="ArrowDown"||e.key==="s"||e.key==="S")moveChicken(-1);
+}
+function tickRoad(){
+  if(!RD.active)return;RD.frameCount++;
+  RD.obstacles.forEach(o=>{o.x+=o.speed*0.45;if(o.x>112)o.x=-14;if(o.x<-14)o.x=112;});
+  drawObstacles();passiveCheck();
+}
+function drawObstacles(){
+  document.querySelectorAll(".road-obstacle,.road-log").forEach(e=>e.remove());
+  const vehicles=["🚗","🚕","🚙","🏎️","🚐","🚌"];
+  RD.obstacles.forEach(o=>{
+    const laneEl=document.getElementById("rl-"+o.lane);if(!laneEl)return;
+    const el=document.createElement("div");
+    if(o.type==="road"){
+      el.className="road-obstacle";el.textContent=vehicles[o.lane%vehicles.length];
+      if(o.speed<0)el.style.transform="translateY(-50%) scaleX(-1)";
+    } else {el.className="road-log";el.textContent="🪵";}
+    el.style.left=o.x+"%";laneEl.appendChild(el);
+  });
+}
+function passiveCheck(){
+  const cfg=LANE_CFG[RD.chickenLane];if(!cfg)return;
+  if(cfg.type==="road"){
+    if(RD.obstacles.filter(o=>o.lane===RD.chickenLane).some(o=>Math.abs(o.x-50)<10))
+      gameOverRoad("💥 Kena kendaraan!");
+  } else if(cfg.type==="river"){
+    if(RD.frameCount%4===0&&!RD.obstacles.filter(o=>o.lane===RD.chickenLane).some(o=>Math.abs(o.x-50)<15))
+      gameOverRoad("💧 Tenggelam!");
+  }
+}
+function moveChicken(dir){
+  if(!RD.active)return;
+  const newLane=RD.chickenLane+dir;
+  if(newLane<0||newLane>=TOTAL_LANES)return;
+  const newCfg=LANE_CFG[newLane];
+  if(newCfg.type==="road"&&RD.obstacles.filter(o=>o.lane===newLane).some(o=>Math.abs(o.x-50)<10)){
+    RD.chickenLane=newLane;placeChicken();setTimeout(()=>gameOverRoad("💥 Langsung ketabrak!"),80);return;
+  }
+  if(newCfg.type==="river"&&!RD.obstacles.filter(o=>o.lane===newLane).some(o=>Math.abs(o.x-50)<15)){
+    RD.chickenLane=newLane;placeChicken();setTimeout(()=>gameOverRoad("💧 Tidak ada kayu!"),80);return;
+  }
+  RD.chickenLane=newLane;placeChicken();
+  if(dir>0&&newCfg.mult>0){
+    RD.mult=calcRoadMult(newLane);
+    setEl("road-mult","textContent",RD.mult.toFixed(2)+"x");
+    const ml=document.getElementById("lmult-"+newLane);
+    if(ml){ml.className="lane-mult active-mult";setTimeout(()=>{if(ml)ml.className="lane-mult";},800);}
+    if(newLane>=1&&!RD.playedOut)setEl("road-cashout-wrap","style.display","block");
+  }
+  setEl("road-pos","textContent",newCfg.label||String(newLane));
+  if(newCfg.type==="finish")winRoad();
+}
+function cashoutRoad(){
+  if(!RD.active||RD.playedOut)return;RD.active=false;RD.playedOut=true;
+  clearInterval(RD.interval);document.removeEventListener("keydown",roadKeyHandler);
+  setEl("road-controls","style.display","none");setEl("road-cashout-wrap","style.display","none");
+  setEl("road-status","textContent","💰 Cash Out!");
+  const el=document.getElementById("road-msg");el.textContent="Cash out di "+RD.mult.toFixed(2)+"x!";
+  el.style.color="#44ff44";el.style.background="rgba(68,255,68,.08)";el.style.border="1px solid rgba(68,255,68,.2)";el.style.display="block";
+  markPlayed("road");setTimeout(()=>openSlot(RD.mult>=2?3:RD.mult>=1.5?2:1),500);
+}
+function winRoad(){
+  RD.active=false;RD.playedOut=true;clearInterval(RD.interval);document.removeEventListener("keydown",roadKeyHandler);
+  setEl("road-controls","style.display","none");setEl("road-cashout-wrap","style.display","none");
+  setEl("road-status","textContent","🏆 Finish!");
+  const el=document.getElementById("road-msg");el.textContent="Ayam sampai finish! "+RD.mult.toFixed(2)+"x — 3 spin!";
+  el.style.color="#44ff44";el.style.background="rgba(68,255,68,.08)";el.style.border="1px solid rgba(68,255,68,.25)";el.style.display="block";
+  setEl("road-reset-btn","style.display","block");markPlayed("road");setTimeout(()=>openSlot(3),600);
+}
+function gameOverRoad(msgText){
+  if(RD.playedOut)return;RD.active=false;RD.playedOut=true;
+  clearInterval(RD.interval);document.removeEventListener("keydown",roadKeyHandler);
+  const laneEl=document.getElementById("rl-"+RD.chickenLane);if(laneEl)laneEl.classList.add("lane-danger");
+  const ch=document.getElementById("chicken");if(ch)ch.textContent="💥";
+  setEl("road-controls","style.display","none");setEl("road-cashout-wrap","style.display","none");
+  setEl("road-status","textContent","💀 Game Over");
+  const el=document.getElementById("road-msg");el.textContent=msgText+" ("+RD.mult.toFixed(2)+"x)";
+  el.style.color="#f87171";el.style.background="rgba(248,113,113,.08)";el.style.border="1px solid rgba(248,113,113,.25)";el.style.display="block";
+  setEl("road-reset-btn","style.display","block");setEl("road-start-btn","style.display","none");
+  markPlayed("road");setTimeout(()=>openSlot(RD.mult>=1.5?2:1),700);
+}
+function resetRoad(){clearInterval(RD.interval);document.removeEventListener("keydown",roadKeyHandler);initRoad();}
+
+
+// INIT
+updateLobby();
+</script>
+</body>
+</html>
